@@ -14,12 +14,12 @@ For example, where in express you'd use
 import express from "express";
 const app = express();
 app.get("/users/:id/", (req, res) => {
-  const user = database.getUser(params.id);
-  res.send(user);
+	const user = database.getUser(params.id);
+	res.send(user);
 });
 app.post("/users/:id/", (req, res) => {
-  const user = database.createUser(params.id);
-  res.send(user);
+	const user = database.createUser(params.id);
+	res.send(user);
 });
 app.listen(8080, () => console.log("Listening!"));
 ```
@@ -29,18 +29,18 @@ in Coggers you instead use
 ```js
 import { Coggers } from "coggers";
 const app = new Coggers({
-  users: {
-    ":id": {
-      $get(req, res, params) {
-        const user = database.getUser(params.id);
-        res.send(user);
-      },
-      $post(req, res, params) {
-        const user = database.createUser(params.id);
-        res.send(user);
-      },
-    },
-  },
+	users: {
+		":id": {
+			$get(req, res, params) {
+				const user = database.getUser(params.id);
+				res.send(user);
+			},
+			$post(req, res, params) {
+				const user = database.createUser(params.id);
+				res.send(user);
+			},
+		},
+	},
 });
 app.listen(8080).then(() => console.log("Listening!"));
 ```
@@ -55,18 +55,18 @@ Anyhow, to add middleware you can use the `$` key, with an array of middlewares.
 import { express } from "coggers/compat";
 import cookieParser from "cookie-parser";
 const app = new Coggers({
-  users: {
-    // express() turns express-based middleware into coggers middleware.
-    $: [express(cookieParser())],
-    $get(req, res, params) {
-      const user = database.getUser(req.cookies.id);
-      res.send(user);
-    },
-    $post(req, res, params) {
-      const user = database.createUser(req.cookies.id);
-      res.send(user);
-    },
-  },
+	users: {
+		// express() turns express-based middleware into coggers middleware.
+		$: [express(cookieParser())],
+		$get(req, res, params) {
+			const user = database.getUser(req.cookies.id);
+			res.send(user);
+		},
+		$post(req, res, params) {
+			const user = database.createUser(req.cookies.id);
+			res.send(user);
+		},
+	},
 });
 ```
 
@@ -77,14 +77,14 @@ As Coggers is fully object-based, modularity is simpler than ever. All you need 
 ```js
 // users.js
 export const users = {
-  $get(req, res, params) {
-    const user = database.getUser(params.id);
-    res.send(user);
-  },
-  $post(req, res, params) {
-    const user = database.createUser(params.id);
-    res.send(user);
-  },
+	$get(req, res, params) {
+		const user = database.getUser(params.id);
+		res.send(user);
+	},
+	$post(req, res, params) {
+		const user = database.createUser(params.id);
+		res.send(user);
+	},
 };
 ```
 
@@ -92,7 +92,7 @@ export const users = {
 // app.js
 import { users } from "./users.js";
 const app = new Coggers({
-  users,
+	users,
 });
 ```
 
@@ -105,7 +105,7 @@ For your IDE to be able to autocomplete blueprints, you can use the `blueprint()
 ```js
 import { blueprint } from "coggers";
 const blue = blueprint({
-  // Woah, intellisense
+	// Woah, intellisense
 });
 ```
 
@@ -114,7 +114,7 @@ In typescript, you can also annotate your variable with the `Blueprint` type:
 ```ts
 import { Blueprint } from "coggers";
 const blue: Blueprint = {
-  // Woah, intellisense
+	// Woah, intellisense
 };
 ```
 

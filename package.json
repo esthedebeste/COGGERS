@@ -1,29 +1,33 @@
 {
-  "name": "coggers",
-  "version": "1.0.0",
-  "description": "we go **fast**",
-  "main": "dist/coggers.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rollup -c"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "@rollup/plugin-typescript": "^8.2.5",
-    "@types/node": "^16.9.1",
-    "rollup": "^2.56.3"
-  },
-  "exports": {
-    ".": "./dist/coggers.js",
-    "./compat": "./dist/compat.js"
-  },
-  "dependencies": {
-    "filename2mime": "1.x"
-  },
-  "files": [
-    "dist"
-  ]
+	"name": "coggers",
+	"version": "1.1.0",
+	"description": "we go **fast**",
+	"main": "dist/coggers.js",
+	"scripts": {
+		"build": "rollup -c",
+		"lint": "prettier -w ./src && eslint --fix .",
+		"prepack": "npm run lint && npm run build && prettier -w ./dist"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"filename2mime": "1.x"
+	},
+	"devDependencies": {
+		"@rollup/plugin-typescript": "^8.2.5",
+		"@types/node": "^16.9.1",
+		"@typescript-eslint/eslint-plugin": "^4.31.2",
+		"@typescript-eslint/parser": "^4.31.2",
+		"eslint": "^7.32.0",
+		"prettier": "^2.4.1",
+		"rollup": "^2.56.3"
+	},
+	"exports": {
+		".": "./dist/coggers.js",
+		"./compat": "./dist/compat.js"
+	},
+	"files": [
+		"dist"
+	]
 }

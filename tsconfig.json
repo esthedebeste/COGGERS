@@ -1,27 +1,27 @@
 {
-  "ts-node": {
-    "transpileOnly": true,
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  },
-  "include": ["src"],
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "outDir": "dist",
-    "baseUrl": "src",
-    "isolatedModules": true,
-    "downlevelIteration": true,
-    "esModuleInterop": true,
-    "noImplicitAny": false,
-    "noUnusedParameters": true,
-    "preserveConstEnums": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "declaration": true
-  }
+	"ts-node": {
+		"transpileOnly": true,
+		"compilerOptions": {
+			"module": "CommonJS"
+		}
+	},
+	"include": ["src"],
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "ESNext",
+		"outDir": "dist",
+		"baseUrl": "src",
+		"isolatedModules": true,
+		"downlevelIteration": true,
+		"esModuleInterop": true,
+		"noImplicitAny": false,
+		"noUnusedParameters": true,
+		"preserveConstEnums": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		"allowJs": true,
+		"declaration": true
+	}
 }
