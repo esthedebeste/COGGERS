@@ -1,0 +1,29 @@
+{
+  "name": "coggers",
+  "version": "1.0.0",
+  "description": "we go **fast**",
+  "main": "dist/coggers.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.5",
+    "@types/node": "^16.9.1",
+    "rollup": "^2.56.3"
+  },
+  "exports": {
+    ".": "./dist/coggers.js",
+    "./compat": "./dist/compat.js"
+  },
+  "dependencies": {
+    "filename2mime": "1.x"
+  },
+  "files": [
+    "dist"
+  ]
+}
