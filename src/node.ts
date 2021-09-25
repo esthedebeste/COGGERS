@@ -50,8 +50,8 @@ export class Node {
 
 		const part = path.shift();
 		if (!part)
-			if (this.methods[req.method]) {
-				for (const handler of this.methods[req.method]) {
+			if (Array.isArray(this.methods[req.method])) {
+				for (const handler of this.methods[req.method] as Handler[]) {
 					await handler(req, res, params);
 					if (res.writableEnded) return;
 				}
