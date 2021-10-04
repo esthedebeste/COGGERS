@@ -1,6 +1,7 @@
 import { lookup } from "filename2mime";
 import { readFileSync } from "node:fs";
 import { ServerResponse } from "node:http";
+import { ResRender } from "./extensions/render";
 
 export class Response extends ServerResponse {
 	protocol: string;
@@ -86,6 +87,9 @@ export class Response extends ServerResponse {
 		Object.setPrototypeOf(res, proto);
 		return (res as Response).extend();
 	}
+
+	/** Only defined after using renderEngine middleware! */
+	render: ResRender;
 }
 
 const statusCodes = {

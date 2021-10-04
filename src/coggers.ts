@@ -6,12 +6,12 @@ import { Blueprint, Options, Params } from "./types";
 export class Coggers extends Node {
 	options: Options;
 	constructor(blueprint: Blueprint, options?: Options) {
+		super(blueprint);
 		options = {
 			xPoweredBy: "COGGERS",
 			notFound: (_, res) => res.status(404).send("Not Found"),
 			...options,
 		};
-		super(blueprint, options);
 		this.options = options;
 	}
 	reqres(rawreq: IncomingMessage, rawres: ServerResponse): void {
@@ -28,7 +28,9 @@ export class Coggers extends Node {
 		 */
 		// @ts-ignore because setPrototype might not return an `any` in the future
 		const params: Params = Object.setPrototypeOf(() => void 0, {});
-		this.pass(path, req, res, params);
+		this.pass(path, req, res, params).catch(error => {
+			if (error === 404) this.options.notFound(req, res, params);
+		});
 	}
 	listen(port: number | string, host?: string): Promise<Server> {
 		const server = new Server(this.reqres.bind(this));
@@ -47,6 +49,7 @@ export class Coggers extends Node {
 export const blueprint = (blueprint: Blueprint): Blueprint => blueprint;
 export default Coggers;
 export { express } from "./compat";
+export * from "./extensions/mod";
 export type {
 	Blueprint,
 	Handler,

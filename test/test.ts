@@ -1,5 +1,9 @@
 import cookieParser from "cookie-parser";
-import { Coggers, express } from "../src/coggers";
+import * as poggies from "poggies";
+import { Coggers, express, renderEngine } from "../src/coggers.js";
+// @ts-expect-error
+const viewsDir = new URL("views", import.meta.url);
+
 const server = new Coggers({
 	$: [
 		(req, res) => {
@@ -9,6 +13,7 @@ const server = new Coggers({
 			}
 		},
 		express(cookieParser()),
+		renderEngine(poggies.renderFile, viewsDir, "pog"),
 	],
 	gaming: {
 		$get(req, res) {
@@ -17,6 +22,23 @@ const server = new Coggers({
 		":game": {
 			$get(_req, res, { game }) {
 				res.send(`Yooo, any ${game} enjoyers?`);
+			},
+			promise: {
+				$get(_req, res, { game }) {
+					res.render("gaming", {
+						game,
+						type: "promise",
+					});
+				},
+			},
+			callback: {
+				$: [renderEngine(poggies.__express, viewsDir, "pog")],
+				$get(_req, res, { game }) {
+					res.render("gaming", {
+						game: game,
+						type: "callback",
+					});
+				},
 			},
 		},
 	},

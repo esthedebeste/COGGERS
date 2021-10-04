@@ -1,9 +1,6 @@
 {
 	"ts-node": {
-		"transpileOnly": true,
-		"compilerOptions": {
-			"module": "CommonJS"
-		}
+		"transpileOnly": true
 	},
 	"include": ["src"],
 	"compilerOptions": {

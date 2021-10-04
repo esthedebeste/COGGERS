@@ -15,6 +15,7 @@
 		"linebreak-style": ["error", "unix"],
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
+		"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
 		"@typescript-eslint/ban-ts-comment": "off"
 	},
 	"root": true,

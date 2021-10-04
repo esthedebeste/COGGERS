@@ -1,6 +1,6 @@
 import { Request } from "./req";
 import { Response } from "./res";
-import { Blueprint, Handler, HTTPMethod, Options, Params, Path } from "./types";
+import { Blueprint, Handler, HTTPMethod, Params, Path } from "./types";
 
 export class Node {
 	methods: Partial<Record<HTTPMethod, Handler[]>> = {};
@@ -8,9 +8,7 @@ export class Node {
 	children: { [key: Path]: Node } = {};
 	wild: Node;
 	wildName: string;
-	notFound: Handler;
-	constructor(blueprint: Blueprint, options: Options) {
-		this.notFound = options.notFound;
+	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
 			if (key === "$") for (const mw of blueprint[key]) this.always(mw);
 			else if (key.startsWith("$"))
@@ -20,8 +18,8 @@ export class Node {
 				else
 					this.method(key.slice(1).toUpperCase() as HTTPMethod, blueprint[key]);
 			else if (key.startsWith(":"))
-				this.wildcard(key.slice(1), new Node(blueprint[key], options));
-			else this.child(key as Path, new Node(blueprint[key], options));
+				this.wildcard(key.slice(1), new Node(blueprint[key]));
+			else this.child(key as Path, new Node(blueprint[key]));
 	}
 	method(method: HTTPMethod, handler: Handler): void {
 		this.methods[method] ??= [];
@@ -47,7 +45,6 @@ export class Node {
 			await always(req, res, params);
 			if (res.writableEnded) return;
 		}
-
 		const part = path.shift();
 		if (!part)
 			if (Array.isArray(this.methods[req.method])) {
@@ -56,7 +53,7 @@ export class Node {
 					if (res.writableEnded) return;
 				}
 				return;
-			} else return this.notFound(req, res, params);
+			} else throw 404;
 		if (this.children[part])
 			return this.children[part].pass(path, req, res, params);
 		else if (this.wild)
@@ -64,6 +61,6 @@ export class Node {
 				...params,
 				[this.wildName]: decodeURIComponent(part.replace(/\+/g, " ")),
 			});
-		return this.notFound(req, res, params);
+		throw 404;
 	}
 }

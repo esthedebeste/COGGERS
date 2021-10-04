@@ -57,9 +57,9 @@ export type HTTPMethod = Lowercase<METHODS>;
 export type Method = `$${HTTPMethod}`;
 export type Wildcard = `:${string}`;
 /* prettier-ignore */ /* temporary fix until there's a proper way to say that paths don't start with a $ */
-type letters = "q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m";
-type letter = Lowercase<letters> | Uppercase<letters>;
-export type Path = `${letter}${string}`;
+type urlchars = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m"|"-"|"."|"_"|"~"|"["|"]"|"@"|"!"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"%"|"=";
+type pathstart = Lowercase<urlchars> | Uppercase<urlchars>;
+export type Path = `${pathstart}${string}`;
 export type Blueprint = {
 	[path: Path]: Blueprint;
 	[param: Wildcard]: Blueprint;

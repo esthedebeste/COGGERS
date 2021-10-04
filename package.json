@@ -1,6 +1,6 @@
 {
 	"name": "coggers",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"description": "we go **fast**",
 	"main": "dist/coggers.js",
 	"scripts": {
@@ -30,7 +30,8 @@
 	},
 	"exports": {
 		".": "./dist/coggers.js",
-		"./compat": "./dist/compat.js"
+		"./compat": "./dist/compat.js",
+		"./extensions": "./dist/extensions/mod.js"
 	},
 	"files": [
 		"dist"
