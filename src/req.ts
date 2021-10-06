@@ -16,7 +16,7 @@ export class Request extends IncomingMessage {
 		// @ts-expect-error Exists on HTTPS IncomingMessage
 		this.secure = this.socket.encrypted;
 		this.protocol = this.secure ? "https" : "http";
-		this.purl = new URL(this.url, `http://${this.headers.host}`);
+		this.purl = new URL(this.url, `${this.protocol}://${this.headers.host}`);
 		this.query = Object.fromEntries(this.purl.searchParams.entries());
 		this.hostname = this.purl.hostname;
 		this.host = this.purl.host;

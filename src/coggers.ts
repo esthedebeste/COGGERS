@@ -18,7 +18,8 @@ export class Coggers extends Node {
 		const req = Request.extend(rawreq);
 		const res = Response.extend(rawres);
 
-		res.headers["X-Powered-By"] = this.options.xPoweredBy ?? "COGGERS";
+		if (this.options.xPoweredBy !== false)
+			res.headers["X-Powered-By"] = this.options.xPoweredBy ?? "COGGERS";
 
 		const path = req.purl.pathname.slice(1).split("/");
 		/**
@@ -30,6 +31,7 @@ export class Coggers extends Node {
 		const params: Params = Object.setPrototypeOf(() => void 0, {});
 		this.pass(path, req, res, params).catch(error => {
 			if (error === 404) this.options.notFound(req, res, params);
+			else throw error;
 		});
 	}
 	listen(port: number | string, host?: string): Promise<Server> {

@@ -1,4 +1,5 @@
 import cookieParser from "cookie-parser";
+import ejs from "ejs";
 import * as poggies from "poggies";
 import { Coggers, express, renderEngine } from "../src/coggers.js";
 // @ts-expect-error
@@ -8,37 +9,30 @@ const server = new Coggers({
 	$: [
 		(req, res) => {
 			if (Math.random() >= 0.9) {
-				res.send({ middleware: { working: true } });
 				console.info(`Canceled ${req.method} request to ${req.url}`);
+				return res.send({ middleware: { working: true } });
 			}
+			req.passed = true;
 		},
-		express(cookieParser()),
 		renderEngine(poggies.renderFile, viewsDir, "pog"),
 	],
-	gaming: {
+	$get(_req, res) {
+		res.render("index");
+	},
+	cookies: {
+		$: [express(cookieParser())],
 		$get(req, res) {
 			res.send(req.cookies);
 		},
+	},
+	gaming: {
 		":game": {
-			$get(_req, res, { game }) {
-				res.send(`Yooo, any ${game} enjoyers?`);
-			},
-			promise: {
-				$get(_req, res, { game }) {
-					res.render("gaming", {
-						game,
-						type: "promise",
-					});
-				},
-			},
-			callback: {
-				$: [renderEngine(poggies.__express, viewsDir, "pog")],
-				$get(_req, res, { game }) {
-					res.render("gaming", {
-						game: game,
-						type: "callback",
-					});
-				},
+			$: [renderEngine(ejs.__express, viewsDir, "ejs")],
+			$get(req, res, { game }) {
+				res.render("gaming", {
+					game,
+					passed: req.passed,
+				});
 			},
 		},
 	},

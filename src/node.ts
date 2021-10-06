@@ -10,10 +10,10 @@ export class Node {
 	wildName: string;
 	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
-			if (key === "$") for (const mw of blueprint[key]) this.always(mw);
+			if (key === "$") for (const mw of blueprint[key].flat()) this.always(mw);
 			else if (key.startsWith("$"))
 				if (Array.isArray(blueprint[key]))
-					for (const handler of blueprint[key])
+					for (const handler of blueprint[key].flat())
 						this.method(key.slice(1).toUpperCase() as HTTPMethod, handler);
 				else
 					this.method(key.slice(1).toUpperCase() as HTTPMethod, blueprint[key]);

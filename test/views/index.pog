@@ -1,0 +1,20 @@
+html {
+  head {
+    title[Hi :D]
+    style[
+      body {
+        font-family: system-ui;
+      }
+      img {
+        height: 6em;
+        width: auto;
+      }
+    ]
+  }
+  body {
+    p[Coggers test :D]
+    img(src=https://cdn.betterttv.net/emote/5ab6f0ece1d6391b63498774/3x alt=COGGERS)
+    br
+    i[served from poggies :D]
+  }
+}

@@ -118,6 +118,40 @@ const blue: Blueprint = {
 };
 ```
 
+### Render Engines
+
+Render engines are defined using the renderEngine middleware. Example:
+
+```js
+import { Coggers, renderEngine } from "coggers";
+import { renderFile } from "poggies";
+// In CommonJS, path.join(__dirname, "views")
+const viewsDirectory = new URL("views", import.meta.url);
+const app = new Coggers({
+	// Poggies files end with ".pog", so "pog" here ⬇️
+	$: [renderEngine(renderFile, viewsDirectory, "pog")],
+	users: {
+		$get(req, res, params) {
+			const user = database.getUser(params.id);
+			res.render("user", { user });
+		},
+	},
+});
+```
+
+/views/user.pog looks like this:
+
+```
+html {
+  head {
+    title[>`Hi, ${user.name}`]
+  }
+  body {
+    p[>`Hi, ${user.name}`]
+  }
+}
+```
+
 ##### Middleware note
 
 Asynchronous middleware is expected to either be defined as an async function, or to return a promise. If a middleware doesn't want to continue to the next handler, it has to send something to the client (using `res.sendStatus(<number>)`, `res.end()`, etc.)

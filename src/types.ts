@@ -9,7 +9,7 @@ export type Handler = (req: Request, res: Response, params: Params) => void;
 export type Middleware = Handler;
 export type Options = {
 	/** Defaults to "COGGERS" */
-	xPoweredBy?: string;
+	xPoweredBy?: string | false;
 	/** Defaults to `res.status(404).send("Not Found")` */
 	notFound?: Handler;
 };
