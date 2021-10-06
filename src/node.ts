@@ -1,39 +1,30 @@
 import { Request } from "./req";
 import { Response } from "./res";
-import { Blueprint, Handler, HTTPMethod, Params, Path } from "./types";
+import {
+	Blueprint,
+	Handler,
+	HTTPMethod,
+	Middleware,
+	Params,
+	Path,
+} from "./types";
 
 export class Node {
 	methods: Partial<Record<HTTPMethod, Handler[]>> = {};
-	alwayss: Handler[] = [];
+	middlewares: Middleware[] = [];
 	children: { [key: Path]: Node } = {};
-	wild: Node;
-	wildName: string;
+	wild: Wildcard;
 	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
-			if (key === "$") for (const mw of blueprint[key].flat()) this.always(mw);
+			if (key === "$")
+				this.middlewares = [blueprint[key]].flat() as Middleware[];
 			else if (key.startsWith("$"))
-				if (Array.isArray(blueprint[key]))
-					for (const handler of blueprint[key].flat())
-						this.method(key.slice(1).toUpperCase() as HTTPMethod, handler);
-				else
-					this.method(key.slice(1).toUpperCase() as HTTPMethod, blueprint[key]);
+				this.methods[key.slice(1).toUpperCase() as HTTPMethod] = [
+					blueprint[key],
+				].flat();
 			else if (key.startsWith(":"))
-				this.wildcard(key.slice(1), new Node(blueprint[key]));
-			else this.child(key as Path, new Node(blueprint[key]));
-	}
-	method(method: HTTPMethod, handler: Handler): void {
-		this.methods[method] ??= [];
-		this.methods[method].push(handler);
-	}
-	always(handler: Handler): void {
-		this.alwayss.push(handler);
-	}
-	child(path: Path, node: Node): void {
-		this.children[path] = node;
-	}
-	wildcard(name: string, node: Node): void {
-		this.wild = node;
-		this.wildName = name;
+				this.wild = new Wildcard(blueprint[key], key.slice(1));
+			else this.children[key] = new Node(blueprint[key]);
 	}
 	async pass(
 		path: string[],
@@ -41,7 +32,7 @@ export class Node {
 		res: Response,
 		params: Params
 	): Promise<void> {
-		for (const always of this.alwayss) {
+		for (const always of this.middlewares) {
 			await always(req, res, params);
 			if (res.writableEnded) return;
 		}
@@ -59,8 +50,16 @@ export class Node {
 		else if (this.wild)
 			return this.wild.pass(path, req, res, {
 				...params,
-				[this.wildName]: decodeURIComponent(part.replace(/\+/g, " ")),
+				[this.wild.name]: decodeURIComponent(part.replace(/\+/g, " ")),
 			});
 		throw 404;
+	}
+}
+
+class Wildcard extends Node {
+	name: string;
+	constructor(blueprint: Blueprint, name: string) {
+		super(blueprint);
+		this.name = name;
 	}
 }

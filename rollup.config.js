@@ -1,10 +1,8 @@
 import ts from "@rollup/plugin-typescript";
 import { rmSync } from "fs";
-import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { dependencies } from "./package.json";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 /** @type {import("rollup").RollupOptions} */
 export default {
 	input: "src/coggers.ts",
@@ -16,7 +14,9 @@ export default {
 		ts({ include: ["./src/**/*.ts"] }),
 		{
 			buildStart() {
-				rmSync(join(__dirname, "dist"), { recursive: true });
+				rmSync(fileURLToPath(new URL("dist", import.meta.url)), {
+					recursive: true,
+				});
 			},
 			writeBundle() {
 				setTimeout(process.exit);

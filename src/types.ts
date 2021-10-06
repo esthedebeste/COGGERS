@@ -60,7 +60,10 @@ export type Wildcard = `:${string}`;
 type urlchars = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m"|"-"|"."|"_"|"~"|"["|"]"|"@"|"!"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"%"|"=";
 type pathstart = Lowercase<urlchars> | Uppercase<urlchars>;
 export type Path = `${pathstart}${string}`;
+type Handlers = Array<Handlers> | Handler;
+type Middlewares = Array<Middlewares> | Middleware;
+
 export type Blueprint = {
 	[path: Path]: Blueprint;
 	[param: Wildcard]: Blueprint;
-} & Partial<Record<Method, Handler | Handler[]>> & { $?: Middleware[] };
+} & Partial<Record<Method, Handlers>> & { $?: Middlewares };
