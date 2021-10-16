@@ -1,30 +1,27 @@
 import { IncomingMessage } from "node:http";
 
 export class Request extends IncomingMessage {
-	protocol: string;
-	purl: URL;
-	query: Record<string, string>;
-	ip: string;
-	secure: boolean;
-	hostname: string;
-	host: string;
-
-	constructor(...args: unknown[]) {
-		// @ts-expect-error
-		super(...args);
-		this.extend();
-	}
-
-	private extend(): Request {
+	get secure(): boolean {
 		// @ts-expect-error Exists on HTTPS IncomingMessage
-		this.secure = this.socket?.encrypted;
-		this.protocol = this.secure ? "https" : "http";
-		this.purl = new URL(this.url, `${this.protocol}://${this.headers.host}`);
-		this.query = Object.fromEntries(this.purl.searchParams.entries());
-		this.hostname = this.purl.hostname;
-		this.host = this.purl.host;
-		this.ip = this.socket.remoteAddress;
-		return this;
+		return this.socket?.encrypted;
+	}
+	get protocol(): "https" | "http" {
+		return this.secure ? "https" : "http";
+	}
+	get purl(): URL {
+		return new URL(this.url, `${this.protocol}://${this.headers.host}`);
+	}
+	get query(): Record<string, string> {
+		return Object.fromEntries(this.purl.searchParams.entries());
+	}
+	get hostname(): string {
+		return this.purl.hostname;
+	}
+	get host(): string {
+		return this.purl.host;
+	}
+	get ip(): string {
+		return this.socket.remoteAddress;
 	}
 
 	header(header: string): string | string[] {
@@ -38,6 +35,6 @@ export class Request extends IncomingMessage {
 		/* Support HTTPS by setting the `extends` of Request to the prototype of `req`.*/
 		Object.setPrototypeOf(proto, Object.getPrototypeOf(req));
 		Object.setPrototypeOf(req, proto);
-		return (req as Request).extend();
+		return req as Request;
 	}
 }
