@@ -1,6 +1,6 @@
-# Coggers
+<div align="center"><img alt="COGGERS" height="120" src="https://cdn.betterttv.net/emote/5ab6f0ece1d6391b63498774/3x"></div>
 
-![COGGERS](https://cdn.betterttv.net/emote/5ab6f0ece1d6391b63498774/3x)
+# Coggers
 
 Coggers is a object-based web server, boasting amazing modularity.
 
@@ -55,7 +55,8 @@ Anyhow, to add middleware you can use the `$` key, with an array of middlewares.
 import { express } from "coggers/compat";
 import cookieParser from "cookie-parser";
 const app = new Coggers({
-	users: {
+	// $$id is the same as :id
+	$$id: {
 		// express() turns express-based middleware into coggers middleware.
 		$: [express(cookieParser())],
 		$get(req, res, params) {

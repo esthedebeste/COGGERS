@@ -4,39 +4,27 @@ import { ServerResponse } from "node:http";
 import { ResRender } from "./extensions/render";
 
 export class Response extends ServerResponse {
-	protocol: string;
-	query: Record<string, string>;
-	ip: string;
-	secure: boolean;
-	/**
-	 * Extends ServerResponse (Basically a constructor)
-	 * @private
-	 */
-	extend(): Response {
-		// @ts-ignore Exists on HTTPS IncomingMessage
-		this.secure = this.socket.encrypted;
-		this.protocol = this.secure ? "https" : "http";
-		this.ip = this.socket.remoteAddress;
-		return this;
-	}
 	get headers(): Record<string, string | number | string[]> {
-		return new Proxy({} as Record<string, string | number | string[]>, {
-			/* Use lambdas instead of functions to make `this` refer to res and not the proxy */
-			get: (_, name: string) => {
-				return this.getHeader(name);
-			},
-			set: (_, name: string, value) => {
-				this.setHeader(name, value);
-				return true;
-			},
-			deleteProperty: (_, name: string) => {
-				this.removeHeader(name);
-				return true;
-			},
-			has: (_, name: string) => {
-				return this.hasHeader(name);
-			},
-		});
+		return new Proxy(
+			{},
+			{
+				/* Use lambdas instead of functions to make `this` refer to res and not the proxy */
+				get: (_, name: string) => {
+					return this.getHeader(name);
+				},
+				set: (_, name: string, value) => {
+					this.setHeader(name, value);
+					return true;
+				},
+				deleteProperty: (_, name: string) => {
+					this.removeHeader(name);
+					return true;
+				},
+				has: (_, name: string) => {
+					return this.hasHeader(name);
+				},
+			}
+		);
 	}
 	status(code: number, message?: string): Response {
 		if (code) this.statusCode = code;
@@ -85,7 +73,7 @@ export class Response extends ServerResponse {
 		/* Support HTTPS by setting the `extends` to the prototype of `res`.*/
 		Object.setPrototypeOf(proto, Object.getPrototypeOf(res));
 		Object.setPrototypeOf(res, proto);
-		return (res as Response).extend();
+		return res as Response;
 	}
 
 	/** Only defined after using renderEngine middleware! */

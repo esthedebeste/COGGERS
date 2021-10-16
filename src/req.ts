@@ -8,13 +8,16 @@ export class Request extends IncomingMessage {
 	secure: boolean;
 	hostname: string;
 	host: string;
-	/**
-	 * Extends IncomingMessage (Basically a constructor)
-	 * @private
-	 */
-	extend(): Request {
+
+	constructor(...args: unknown[]) {
+		// @ts-expect-error
+		super(...args);
+		this.extend();
+	}
+
+	private extend(): Request {
 		// @ts-expect-error Exists on HTTPS IncomingMessage
-		this.secure = this.socket.encrypted;
+		this.secure = this.socket?.encrypted;
 		this.protocol = this.secure ? "https" : "http";
 		this.purl = new URL(this.url, `${this.protocol}://${this.headers.host}`);
 		this.query = Object.fromEntries(this.purl.searchParams.entries());
@@ -23,6 +26,7 @@ export class Request extends IncomingMessage {
 		this.ip = this.socket.remoteAddress;
 		return this;
 	}
+
 	header(header: string): string | string[] {
 		return this.headers[header.toLowerCase()];
 	}

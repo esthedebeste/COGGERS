@@ -26,7 +26,7 @@ const server = new Coggers({
 		},
 	},
 	gaming: {
-		":game": {
+		$$game: {
 			$: [renderEngine(ejs.__express, viewsDir, "ejs")],
 			$get(req, res, { game }) {
 				res.render("gaming", {

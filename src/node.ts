@@ -1,32 +1,27 @@
 import { Request } from "./req";
 import { Response } from "./res";
-import {
-	Blueprint,
-	Handler,
-	HTTPMethod,
-	Middleware,
-	Params,
-	Path,
-} from "./types";
+import { Blueprint, Handler, METHODS, Middleware, Params, Path } from "./types";
 
 export class Node {
-	methods: Partial<Record<HTTPMethod, Handler[]>> = {};
-	middlewares: Middleware[] = [];
-	children: { [key: Path]: Node } = {};
-	wild: Wildcard;
+	private methods: Partial<Record<METHODS, Handler[]>> = {};
+	private middlewares: Middleware[] = [];
+	private children: { [key: Path]: Node } = {};
+	private wild: Wildcard;
 	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
 			if (key === "$")
-				this.middlewares = [blueprint[key]].flat() as Middleware[];
+				this.middlewares = [blueprint[key]].flat(Infinity) as Middleware[];
+			// Both : and $$ are supported for wildcards because { $$wild } looks better than { ":wild": wild }.
+			// Also, you can't export a variable that starts with a :
+			else if (key.startsWith(":") || key.startsWith("$$"))
+				this.wild = new Wildcard(blueprint[key], key.replace(/^:|\$\$/, ""));
 			else if (key.startsWith("$"))
-				this.methods[key.slice(1).toUpperCase() as HTTPMethod] = [
-					blueprint[key],
-				].flat();
-			else if (key.startsWith(":"))
-				this.wild = new Wildcard(blueprint[key], key.slice(1));
+				this.methods[key.slice(1).toUpperCase()] = [blueprint[key]].flat(
+					Infinity
+				);
 			else this.children[key] = new Node(blueprint[key]);
 	}
-	async pass(
+	protected async pass(
 		path: string[],
 		req: Request,
 		res: Response,
@@ -37,8 +32,9 @@ export class Node {
 			if (res.writableEnded) return;
 		}
 		const part = path.shift();
+		// Checks if part is "" (/path/) or undefined (/path)
 		if (!part)
-			if (Array.isArray(this.methods[req.method])) {
+			if (this.methods[req.method]) {
 				for (const handler of this.methods[req.method] as Handler[]) {
 					await handler(req, res, params);
 					if (res.writableEnded) return;

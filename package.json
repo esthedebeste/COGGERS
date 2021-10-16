@@ -1,13 +1,14 @@
 {
 	"name": "coggers",
-	"version": "1.2.3",
+	"version": "1.3.0",
 	"description": "we go **fast**",
-	"main": "dist/coggers.js",
+	"main": "./dist/coggers.js",
+	"types": "./dist/coggers.d.ts",
 	"scripts": {
 		"build": "rollup -c",
-		"lint": "prettier -w ./src && eslint --fix .",
+		"format": "prettier -w ./src && eslint --fix .",
 		"test": "node --loader ts-node/esm --experimental-specifier-resolution=node ./test/test.ts",
-		"prepack": "npm run lint && npm run build && prettier -w ./dist"
+		"prepack": "npm run format && npm run build && prettier -w ./dist"
 	},
 	"keywords": [],
 	"author": "",
@@ -23,7 +24,8 @@
 		"eslint": "^7.32.0",
 		"prettier": "^2.4.1",
 		"rollup": "^2.58.0",
-		"ts-node": "^10.2.1"
+		"ts-node": "^10.2.1",
+		"typescript": "^4.4.3"
 	},
 	"type": "module",
 	"repository": {

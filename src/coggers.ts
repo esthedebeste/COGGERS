@@ -2,9 +2,16 @@ import { IncomingMessage, Server, ServerResponse } from "node:http";
 import { Node } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
-import { Blueprint, Options, Params } from "./types";
+import type { Blueprint, Handler, Params } from "./types";
+export type Options = {
+	/** Defaults to "COGGERS" */
+	xPoweredBy?: string | false;
+	/** Defaults to `res.status(404).send("Not Found")` */
+	notFound?: Handler;
+};
+
 export class Coggers extends Node {
-	options: Options;
+	protected options: Options;
 	constructor(blueprint: Blueprint, options?: Options) {
 		super(blueprint);
 		options = {
@@ -14,28 +21,33 @@ export class Coggers extends Node {
 		};
 		this.options = options;
 	}
+
 	reqres(rawreq: IncomingMessage, rawres: ServerResponse): void {
 		const req = Request.extend(rawreq);
 		const res = Response.extend(rawres);
+		this.handle(req, res);
+	}
 
+	protected handle(req: Request, res: Response): void {
 		if (this.options.xPoweredBy !== false)
 			res.headers["X-Powered-By"] = this.options.xPoweredBy ?? "COGGERS";
-
 		const path = req.purl.pathname.slice(1).split("/");
-		/**
-		 * A bit of a hack which will allow express-style middleware to be used
-		 * by turning the params object into a callable function (like express's `next()`)
-		 * while also removing all prototypes from said function.
-		 */
-		// @ts-ignore because setPrototype might not return an `any` in the future
-		const params: Params = Object.setPrototypeOf(() => void 0, {});
+		const params: Params = {};
 		this.pass(path, req, res, params).catch(error => {
 			if (error === 404) this.options.notFound(req, res, params);
 			else throw error;
 		});
 	}
+
 	listen(port: number | string, host?: string): Promise<Server> {
-		const server = new Server(this.reqres.bind(this));
+		const server = new Server(
+			{
+				// node:http allows us to directly extend IncomingMessage
+				IncomingMessage: Request,
+				ServerResponse: Response,
+			},
+			this.handle.bind(this)
+		);
 		return new Promise(resolve => {
 			server.listen(
 				{
@@ -57,7 +69,6 @@ export type {
 	Handler,
 	HTTPMethod,
 	Middleware,
-	Options,
 	Request,
 	Response,
 } from "./types";

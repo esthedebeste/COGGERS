@@ -1,24 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request as Req } from "./req";
 import { Response as Res } from "./res";
 /** middleware adds keys sometimes */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Extended = Record<any, any>;
+export type Params = Record<string, string>;
 export type Request = Req & Extended;
 export type Response = Res & Extended;
-export type Handler = (req: Request, res: Response, params: Params) => void;
-export type Middleware = Handler;
-export type Options = {
-	/** Defaults to "COGGERS" */
-	xPoweredBy?: string | false;
-	/** Defaults to `res.status(404).send("Not Found")` */
-	notFound?: Handler;
-};
+type extractParamName<raw> = raw extends `${"$$" | ":"}${infer R}` ? R : raw;
+export type Handler<Params extends string = never> = (
+	req: Request,
+	res: Response,
+	params: Record<extractParamName<Params>, string>
+) => void;
+export type Middleware<Params extends string = never> = Handler<Params>;
 
-export type Params = {
-	[name: string]: string;
-};
 /** From import("node:http").METHODS */
-type METHODS =
+export type METHODS =
 	| "ACL"
 	| "BIND"
 	| "CHECKOUT"
@@ -55,15 +53,24 @@ type METHODS =
 	| "UNSUBSCRIBE";
 export type HTTPMethod = Lowercase<METHODS>;
 export type Method = `$${HTTPMethod}`;
-export type Wildcard = `:${string}`;
+export type Wildcard = `${":" | "$$"}${string}`;
 /* prettier-ignore */ /* temporary fix until there's a proper way to say that paths don't start with a $ */
 type urlchars = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m"|"-"|"."|"_"|"~"|"["|"]"|"@"|"!"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"%"|"=";
 type pathstart = Lowercase<urlchars> | Uppercase<urlchars>;
 export type Path = `${pathstart}${string}`;
-type Handlers = Array<Handlers> | Handler;
-type Middlewares = Array<Middlewares> | Middleware;
-
-export type Blueprint = {
-	[path: Path]: Blueprint;
-	[param: Wildcard]: Blueprint;
-} & Partial<Record<Method, Handlers>> & { $?: Middlewares };
+type Handlers<Params extends string> =
+	| Array<Handlers<Params>>
+	| Handler<Params>;
+type Middlewares<Params extends string> =
+	| Array<Middlewares<Params>>
+	| Middleware<Params>;
+export type Blueprint<Params extends string = never> = {
+	$?: Middlewares<Params>;
+} & {
+	/** https://github.com/microsoft/TypeScript/issues/22509 */
+	[param in Wildcard]?: Blueprint<Params | param>;
+} & {
+	[P in Method]?: Handlers<Params>;
+} & {
+	[path: Path]: Blueprint<Params>;
+};
