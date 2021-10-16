@@ -31,10 +31,10 @@ export class Request extends IncomingMessage {
 		return this.header(header);
 	}
 	static extend(req: IncomingMessage): Request {
-		const proto = Request.prototype;
-		/* Support HTTPS by setting the `extends` of Request to the prototype of `req`.*/
-		Object.setPrototypeOf(proto, Object.getPrototypeOf(req));
-		Object.setPrototypeOf(req, proto);
-		return req as Request;
+		/* Support HTTPS by setting the `extends` of Request to the prototype of `req`. */
+		return Object.setPrototypeOf(
+			req,
+			Object.setPrototypeOf(Request.prototype, Object.getPrototypeOf(req))
+		) as Request;
 	}
 }

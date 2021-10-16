@@ -1,5 +1,5 @@
 import { lookup } from "filename2mime";
-import { readFileSync } from "node:fs";
+import { createReadStream } from "node:fs";
 import { ServerResponse } from "node:http";
 import { ResRender } from "./extensions/render";
 
@@ -27,7 +27,7 @@ export class Response extends ServerResponse {
 		);
 	}
 	status(code: number, message?: string): Response {
-		if (code) this.statusCode = code;
+		this.statusCode = code;
 		if (message) this.statusMessage = message ?? statusCodes[code];
 		return this;
 	}
@@ -50,7 +50,7 @@ export class Response extends ServerResponse {
 	}
 	sendFile(file: string): void {
 		this.headers["Content-Type"] ??= lookup(file);
-		this.end(readFileSync(file));
+		createReadStream(file).pipe(this);
 	}
 	set(headers: Record<string, string | number | string[]>): Response;
 	set(header: string, value: string | number | string[]): Response;
@@ -69,11 +69,11 @@ export class Response extends ServerResponse {
 		this.end();
 	}
 	static extend(res: ServerResponse): Response {
-		const proto = Response.prototype;
-		/* Support HTTPS by setting the `extends` to the prototype of `res`.*/
-		Object.setPrototypeOf(proto, Object.getPrototypeOf(res));
-		Object.setPrototypeOf(res, proto);
-		return res as Response;
+		/* Support HTTPS by setting the `extends` of Response to the prototype of `res`. */
+		return Object.setPrototypeOf(
+			res,
+			Object.setPrototypeOf(Response.prototype, Object.getPrototypeOf(res))
+		) as Response;
 	}
 
 	/** Only defined after using renderEngine middleware! */

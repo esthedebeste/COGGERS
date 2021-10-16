@@ -7,11 +7,10 @@ type Extended = Record<any, any>;
 export type Params = Record<string, string>;
 export type Request = Req & Extended;
 export type Response = Res & Extended;
-type extractParamName<raw> = raw extends `${"$$" | ":"}${infer R}` ? R : raw;
 export type Handler<Params extends string = never> = (
 	req: Request,
 	res: Response,
-	params: Record<extractParamName<Params>, string>
+	params: Record<Params, string>
 ) => void;
 export type Middleware<Params extends string = never> = Handler<Params>;
 
@@ -64,13 +63,14 @@ type Handlers<Params extends string> =
 type Middlewares<Params extends string> =
 	| Array<Middlewares<Params>>
 	| Middleware<Params>;
+type extractParamName<raw> = raw extends `${"$$" | ":"}${infer R}` ? R : raw;
 export type Blueprint<Params extends string = never> = {
 	$?: Middlewares<Params>;
 } & {
 	/** https://github.com/microsoft/TypeScript/issues/22509 */
-	[param in Wildcard]?: Blueprint<Params | param>;
+	[param in Wildcard]?: Blueprint<Params | extractParamName<param>>;
 } & {
-	[P in Method]?: Handlers<Params>;
+	[M in Method]?: Handlers<Params>;
 } & {
 	[path: Path]: Blueprint<Params>;
 };
