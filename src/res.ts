@@ -2,6 +2,7 @@ import { lookup } from "filename2mime";
 import { createReadStream } from "node:fs";
 import { ServerResponse } from "node:http";
 import { ResRender } from "./extensions/render";
+import { reversedMime } from "./utils.js";
 
 export class Response extends ServerResponse {
 	get headers(): Record<string, string | number | string[]> {
@@ -26,32 +27,41 @@ export class Response extends ServerResponse {
 			}
 		);
 	}
+
 	status(code: number, message?: string): Response {
 		this.statusCode = code;
 		if (message) this.statusMessage = message ?? statusCodes[code];
 		return this;
 	}
+
 	sendStatus(code: number, message?: string): void {
 		this.status(code, message).end();
 	}
+
 	json(data: unknown): void {
 		this.headers["Content-Type"] ??= "application/json; charset=UTF-8";
 		this.end(JSON.stringify(data));
 	}
+
+	html(data: string): void {
+		this.headers["Content-Type"] ??= "text/html; charset=UTF-8";
+		this.end(data);
+	}
+
 	send(data: unknown): void {
 		if (data instanceof Uint8Array) {
 			this.headers["Content-Type"] ??= "application/octet-stream";
 			this.end(data);
-		} else if (typeof data === "string") {
-			this.headers["Content-Type"] ??= "text/html; charset=UTF-8";
-			this.end(data);
-		} else if (data == null) this.end();
+		} else if (typeof data === "string") this.html(data);
+		else if (data == null) this.end();
 		else this.json(data);
 	}
+
 	sendFile(file: string): void {
 		this.headers["Content-Type"] ??= lookup(file);
 		createReadStream(file).pipe(this);
 	}
+
 	set(headers: Record<string, string | number | string[]>): Response;
 	set(header: string, value: string | number | string[]): Response;
 	set(
@@ -63,11 +73,20 @@ export class Response extends ServerResponse {
 		else this.headers[header] = value;
 		return this;
 	}
+
 	redirect(url: string, status?: number): void {
 		this.status(status || 302);
 		this.headers.Location = url;
 		this.end();
 	}
+
+	type(type: string): string | null {
+		if (type.includes("/")) return (this.headers["Content-Type"] = type);
+		if (reversedMime[type])
+			return (this.headers["Content-Type"] = reversedMime[type]);
+		return null;
+	}
+
 	static extend(res: ServerResponse): Response {
 		/* Support HTTPS by setting the `extends` of Response to the prototype of `res`. */
 		return Object.setPrototypeOf(

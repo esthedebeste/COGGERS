@@ -9,7 +9,7 @@ export class Request extends IncomingMessage {
 		return this.secure ? "https" : "http";
 	}
 	get purl(): URL {
-		return new URL(this.url, `${this.protocol}://${this.headers.host}`);
+		return new URL(this.url, `${this.protocol}://${this.host}`);
 	}
 	get query(): Record<string, string> {
 		return Object.fromEntries(this.purl.searchParams.entries());
@@ -18,7 +18,7 @@ export class Request extends IncomingMessage {
 		return this.purl.hostname;
 	}
 	get host(): string {
-		return this.purl.host;
+		return this.headers.host;
 	}
 	get ip(): string {
 		return this.socket.remoteAddress;
@@ -30,6 +30,7 @@ export class Request extends IncomingMessage {
 	getHeader(header: string): string | string[] {
 		return this.header(header);
 	}
+
 	static extend(req: IncomingMessage): Request {
 		/* Support HTTPS by setting the `extends` of Request to the prototype of `req`. */
 		return Object.setPrototypeOf(

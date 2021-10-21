@@ -1,4 +1,4 @@
-import { Middleware } from "./types";
+import { Middleware } from "./utils";
 
 type Express = (req, res, next) => unknown;
 

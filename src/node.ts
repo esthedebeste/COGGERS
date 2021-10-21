@@ -1,6 +1,6 @@
 import { Request } from "./req";
 import { Response } from "./res";
-import { Blueprint, Handler, METHODS, Middleware, Params, Path } from "./types";
+import { Blueprint, Handler, METHODS, Middleware, Params, Path } from "./utils";
 
 export class Node {
 	private methods: Partial<Record<METHODS, Handler[]>> = {};
@@ -9,8 +9,7 @@ export class Node {
 	private wild: Wildcard;
 	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
-			if (key === "$")
-				this.middlewares = [blueprint[key]].flat(Infinity) as Middleware[];
+			if (key === "$") this.middlewares = [blueprint[key]].flat(Infinity);
 			// Both : and $$ are supported for wildcards because { $$wild } looks better than { ":wild": wild }.
 			// Also, you can't export a variable that starts with a :
 			else if (key.startsWith(":") || key.startsWith("$$"))
@@ -27,8 +26,8 @@ export class Node {
 		res: Response,
 		params: Params
 	): Promise<void> {
-		for (const always of this.middlewares) {
-			await always(req, res, params);
+		for (const middleware of this.middlewares) {
+			await middleware(req, res, params);
 			if (res.writableEnded) return;
 		}
 		const part = path.shift();

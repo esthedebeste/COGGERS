@@ -2,7 +2,7 @@ import { IncomingMessage, Server, ServerResponse } from "node:http";
 import { Node } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
-import type { Blueprint, Handler, Params } from "./types";
+import type { Blueprint, Handler, Params } from "./utils";
 export type Options = {
 	/** Defaults to "COGGERS" */
 	xPoweredBy?: string | false;
@@ -14,26 +14,25 @@ export class Coggers extends Node {
 	protected options: Options;
 	constructor(blueprint: Blueprint, options?: Options) {
 		super(blueprint);
-		options = {
+		this.options = {
 			xPoweredBy: "COGGERS",
 			notFound: (_, res) => res.status(404).send("Not Found"),
 			...options,
 		};
-		this.options = options;
 	}
 
-	reqres(rawreq: IncomingMessage, rawres: ServerResponse): void {
+	reqres(rawreq: IncomingMessage, rawres: ServerResponse): Promise<void> {
 		const req = Request.extend(rawreq);
 		const res = Response.extend(rawres);
-		this.handle(req, res);
+		return this.handle(req, res);
 	}
 
-	protected handle(req: Request, res: Response): void {
+	protected handle(req: Request, res: Response): Promise<void> {
 		if (this.options.xPoweredBy !== false)
-			res.headers["X-Powered-By"] = this.options.xPoweredBy ?? "COGGERS";
+			res.headers["X-Powered-By"] = this.options.xPoweredBy;
 		const path = req.purl.pathname.slice(1).split("/");
 		const params: Params = {};
-		this.pass(path, req, res, params).catch(error => {
+		return this.pass(path, req, res, params).catch(error => {
 			if (error === 404) this.options.notFound(req, res, params);
 			else throw error;
 		});
@@ -71,4 +70,4 @@ export type {
 	Middleware,
 	Request,
 	Response,
-} from "./types";
+} from "./utils";

@@ -1,6 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { mime } from "filename2mime";
 import { Request as Req } from "./req";
 import { Response as Res } from "./res";
+
+export const reversedMime = Object.fromEntries(
+	Object.entries(mime).map(([ext, mime]) => [mime, ext])
+);
+
 /** middleware adds keys sometimes */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Extended = Record<any, any>;

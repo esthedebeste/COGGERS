@@ -30,5 +30,5 @@ export default {
 			},
 		},
 	],
-	external: Object.keys(dependencies || {}),
+	external: Object.keys(dependencies),
 };
