@@ -36,6 +36,16 @@ const server = new Coggers({
 			},
 		},
 	},
+	content: {
+		$get(req, res) {
+			req.format({
+				html: () => res.send("<h1>Hi!</h1><i>text/html</i>"),
+				json: () => res.send({ text: "Hi!", from: "application/json" }),
+				txt: () => res.type("txt").send("Hi! (text/plain)"),
+				default: () => res.end("Hi!"),
+			});
+		},
+	},
 });
 const port = process.env.PORT ?? 8080;
 server.listen(port).then(() => {
