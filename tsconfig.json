@@ -10,14 +10,11 @@
 		"baseUrl": "src",
 		"isolatedModules": true,
 		"downlevelIteration": true,
-		"esModuleInterop": true,
 		"noImplicitAny": false,
 		"noUnusedParameters": true,
-		"preserveConstEnums": true,
 		"skipLibCheck": true,
 		"moduleResolution": "node",
 		"forceConsistentCasingInFileNames": true,
-		"allowSyntheticDefaultImports": true,
 		"allowJs": true,
 		"declaration": true
 	}

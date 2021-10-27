@@ -27,7 +27,7 @@ export class Response extends ServerResponse {
 		);
 	}
 
-	status(code: number, message?: string): Response {
+	status(code: number, message?: string): this {
 		this.statusCode = code;
 		if (message) this.statusMessage = message;
 		return this;
@@ -61,25 +61,23 @@ export class Response extends ServerResponse {
 		createReadStream(file).pipe(this);
 	}
 
-	set(headers: Record<string, string | number | string[]>): Response;
-	set(header: string, value: string | number | string[]): Response;
+	set(headers: Record<string, string | number | string[]>): this;
+	set(header: string, value: string | number | string[]): this;
 	set(
 		header: string | Record<string, string | number | string[]>,
 		value?: string | number | string[]
-	): Response {
+	): this {
 		if (typeof header === "object")
 			for (const key in header) this.headers[key] = header[key];
 		else this.headers[header] = value;
 		return this;
 	}
 
-	redirect(url: string, status?: number): void {
-		this.status(status || 302);
-		this.headers.Location = url;
-		this.end();
+	redirect(url: string, status = 302): void {
+		this.status(status).setHeader("Location", url).end();
 	}
 
-	type(type: string): Response {
+	type(type: string): this {
 		if (type.includes("/")) this.headers["Content-Type"] = type;
 		else if (mime[type]) this.headers["Content-Type"] = mime[type];
 		return this;
