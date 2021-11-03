@@ -1,4 +1,5 @@
-import { IncomingMessage, Server, ServerResponse } from "node:http";
+import * as http from "node:http";
+import type * as https from "node:https";
 import { Node } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
@@ -10,18 +11,49 @@ export type Options = {
 	notFound?: Handler;
 };
 
-export class Coggers extends Node {
-	protected options: Options;
-	constructor(blueprint: Blueprint, options?: Options) {
+export class Coggers<
+	Server extends http.Server | https.Server,
+	ServerCreator extends (...args) => Server
+> extends Node {
+	protected options: ConstructorParameters<typeof Coggers>[1];
+	server: Server;
+	constructor(
+		blueprint: Blueprint,
+		options?: {
+			/** Defaults to "COGGERS" */
+			xPoweredBy?: string | false;
+			/** Defaults to `res.status(404).send("Not Found")` */
+			notFound?: Handler;
+			/** http.createServer, https.createServer, etc. */
+			serverCreator?: ServerCreator;
+			/** Arguments to http.createServer, https.createServer, etc. */
+			createServerArgs?: Parameters<ServerCreator>[0];
+		}
+	) {
 		super(blueprint);
 		this.options = {
 			xPoweredBy: "COGGERS",
 			notFound: (_, res) => res.status(404).send("Not Found"),
+			serverCreator: http.createServer,
+			createServerArgs: {},
 			...options,
 		};
+
+		// @ts-ignore
+		this.server = this.options.serverCreator(
+			{
+				...this.options.createServerArgs,
+				IncomingMessage: Request,
+				ServerResponse: Response,
+			},
+			this.handle.bind(this)
+		);
 	}
 
-	reqres(rawreq: IncomingMessage, rawres: ServerResponse): Promise<void> {
+	reqres(
+		rawreq: http.IncomingMessage,
+		rawres: http.ServerResponse
+	): Promise<void> {
 		const req = Request.extend(rawreq);
 		const res = Response.extend(rawres);
 		return this.handle(req, res);
@@ -40,21 +72,13 @@ export class Coggers extends Node {
 	}
 
 	listen(port: number | string, host?: string): Promise<Server> {
-		const server = new Server(
-			{
-				// node:http allows us to directly extend IncomingMessage
-				IncomingMessage: Request,
-				ServerResponse: Response,
-			},
-			this.handle.bind(this)
-		);
 		return new Promise(resolve => {
-			server.listen(
+			this.server.listen(
 				{
 					port,
 					host,
 				},
-				() => resolve(server)
+				() => resolve(this.server)
 			);
 		});
 	}
@@ -64,11 +88,5 @@ export const blueprint = (blueprint: Blueprint): Blueprint => blueprint;
 export default Coggers;
 export { express } from "./compat";
 export * from "./extensions/mod";
-export type {
-	Blueprint,
-	Handler,
-	HTTPMethod,
-	Middleware,
-	Request,
-	Response,
-} from "./utils";
+export type { Blueprint, Handler, HTTPMethod, Middleware } from "./utils";
+export { Request, Response };

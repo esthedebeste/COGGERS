@@ -17,15 +17,19 @@ export class Request extends IncomingMessage {
 	host: string;
 	hostname: string;
 	ip: string;
-	_init(): void {
+	_init(): this {
 		// @ts-ignore exists on TLSSocket
 		this.secure = this.socket.encrypted ?? false;
 		this.protocol = this.secure ? "https" : "http";
-		this.host = this.headers.host;
-		this.hostname = this.host.split(":")[0];
 		this.ip = this.socket.remoteAddress;
-		this.purl = new URL(this.url, `${this.protocol}://${this.host}`);
+		this.purl = new URL(
+			this.url,
+			`${this.protocol}://${this.headers.host ?? this.headers[":authority"]}`
+		);
+		this.host = this.purl.host;
+		this.hostname = this.purl.hostname;
 		this.query = Object.fromEntries(this.purl.searchParams);
+		return this;
 	}
 
 	header(header: string): string | string[] {
@@ -68,9 +72,11 @@ export class Request extends IncomingMessage {
 
 	static extend(req: IncomingMessage): Request {
 		/* Support HTTPS by setting the `extends` of Request to the prototype of `req`. */
-		return Object.setPrototypeOf(
-			req,
-			Object.setPrototypeOf(Request.prototype, Object.getPrototypeOf(req))
-		) as Request;
+		return (
+			Object.setPrototypeOf(
+				req,
+				Object.setPrototypeOf(Request.prototype, Object.getPrototypeOf(req))
+			) as Request
+		)._init();
 	}
 }
