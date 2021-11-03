@@ -1,9 +1,11 @@
 import cookieParser from "cookie-parser";
 import ejs from "ejs";
+import { fileURLToPath } from "node:url";
 import * as poggies from "poggies";
 import { Coggers, express, renderEngine } from "../src/coggers.js";
-// @ts-expect-error
-const viewsDir = new URL("views", import.meta.url);
+// @ts-ignore
+const url = import.meta.url;
+const viewsDir = new URL("views", url);
 
 const server = new Coggers({
 	$: [
@@ -25,12 +27,12 @@ const server = new Coggers({
 			res.send(req.cookies);
 		},
 	},
-	gaming: {
-		$$game: {
+	params: {
+		$$param: {
 			$: [renderEngine(ejs.__express, viewsDir, "ejs")],
-			$get(req, res, { game }) {
-				res.render("gaming", {
-					game,
+			$get(req, res, { param }) {
+				res.render("params", {
+					param,
 					passed: req.passed,
 				});
 			},
@@ -39,7 +41,7 @@ const server = new Coggers({
 	content: {
 		$get(req, res) {
 			req.format({
-				html: () => res.send("<h1>Hi!</h1><i>text/html</i>"),
+				html: () => res.sendFile(fileURLToPath(new URL("public/hi.html", url))),
 				json: () => res.send({ text: "Hi!", from: "application/json" }),
 				txt: () => res.type("txt").send("Hi! (text/plain)"),
 				default: () => res.end("Hi!"),

@@ -10,27 +10,22 @@ export class Request extends IncomingMessage {
 		return this._accept;
 	}
 
-	get secure(): boolean {
-		// @ts-expect-error Exists on HTTPS IncomingMessage
-		return this.socket?.encrypted;
-	}
-	get protocol(): "https" | "http" {
-		return this.secure ? "https" : "http";
-	}
-	get purl(): URL {
-		return new URL(this.url, `${this.protocol}://${this.host}`);
-	}
-	get query(): Record<string, string> {
-		return Object.fromEntries(this.purl.searchParams.entries());
-	}
-	get hostname(): string {
-		return this.purl.hostname;
-	}
-	get host(): string {
-		return this.headers.host;
-	}
-	get ip(): string {
-		return this.socket.remoteAddress;
+	purl: URL;
+	query: Record<string, string>;
+	secure: boolean;
+	protocol: "https" | "http";
+	host: string;
+	hostname: string;
+	ip: string;
+	_init(): void {
+		// @ts-ignore exists on TLSSocket
+		this.secure = this.socket.encrypted ?? false;
+		this.protocol = this.secure ? "https" : "http";
+		this.host = this.headers.host;
+		this.hostname = this.host.split(":")[0];
+		this.ip = this.socket.remoteAddress;
+		this.purl = new URL(this.url, `${this.protocol}://${this.host}`);
+		this.query = Object.fromEntries(this.purl.searchParams);
 	}
 
 	header(header: string): string | string[] {

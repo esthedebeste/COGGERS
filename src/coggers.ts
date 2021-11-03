@@ -28,6 +28,7 @@ export class Coggers extends Node {
 	}
 
 	protected handle(req: Request, res: Response): Promise<void> {
+		req._init();
 		if (this.options.xPoweredBy !== false)
 			res.headers["X-Powered-By"] = this.options.xPoweredBy;
 		const path = req.purl.pathname.slice(1).split("/");

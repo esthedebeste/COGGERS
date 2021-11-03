@@ -1,9 +1,21 @@
 import { lookup, mime } from "filename2mime";
-import { createReadStream } from "node:fs";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { ServerResponse } from "node:http";
 import { ResRender } from "./extensions/render";
+import { Request } from "./req";
+
+const weakETag = (
+	data: string | Uint8Array,
+	// TODO?: Make ETags more customizable?
+	{ hash, size } = { hash: "sha1", size: 32 }
+): string =>
+	`W/"${createHash(hash).update(data).digest("base64url").slice(0, size)}"`;
 
 export class Response extends ServerResponse {
+	/** Provided by node, a reference to the Request object. */
+	req: Request;
+
 	get headers(): Record<string, string | number | string[]> {
 		return new Proxy(
 			{},
@@ -27,6 +39,22 @@ export class Response extends ServerResponse {
 		);
 	}
 
+	/** {@link Response.end res.end} with extra etagging */
+	etagEnd(data: Uint8Array | string, override = false): Promise<void> {
+		let dataTag = this.headers.ETag as string;
+		if (!dataTag || override) this.headers.ETag = dataTag = weakETag(data);
+
+		// Remove W/ because If-None-Match is always weak.
+		dataTag = dataTag.replace(/^W\//, "");
+
+		if (this.req.headers["if-none-match"])
+			for (const etag of this.req.headers["if-none-match"].match(/"[^"]*"/g))
+				if (etag === dataTag)
+					return new Promise(callback => this.status(304).end(callback));
+
+		return new Promise(callback => this.end(data, callback));
+	}
+
 	status(code: number, message?: string): this {
 		this.statusCode = code;
 		if (message) this.statusMessage = message;
@@ -39,18 +67,18 @@ export class Response extends ServerResponse {
 
 	json(data: unknown): void {
 		this.headers["Content-Type"] ??= "application/json; charset=UTF-8";
-		this.end(JSON.stringify(data));
+		this.etagEnd(JSON.stringify(data));
 	}
 
 	html(data: string): void {
 		this.headers["Content-Type"] ??= "text/html; charset=UTF-8";
-		this.end(data);
+		this.etagEnd(data);
 	}
 
 	send(data: unknown): void {
 		if (data instanceof Uint8Array) {
 			this.headers["Content-Type"] ??= "application/octet-stream";
-			this.end(data);
+			this.etagEnd(data);
 		} else if (typeof data === "string") this.html(data);
 		else if (data == null) this.end();
 		else this.json(data);
@@ -58,7 +86,9 @@ export class Response extends ServerResponse {
 
 	sendFile(file: string): void {
 		this.headers["Content-Type"] ??= lookup(file);
-		createReadStream(file).pipe(this);
+		// TODO: Make this work with streams again.
+		const data = readFileSync(file);
+		this.etagEnd(data);
 	}
 
 	set(headers: Record<string, string | number | string[]>): this;
