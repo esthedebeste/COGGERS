@@ -28,7 +28,7 @@ in Coggers you instead use
 
 ```js
 import { Coggers } from "coggers";
-const app = new Coggers({
+const coggers = new Coggers({
 	users: {
 		":id": {
 			$get(req, res, params) {
@@ -42,7 +42,7 @@ const app = new Coggers({
 		},
 	},
 });
-app.listen(8080).then(() => console.log("Listening!"));
+coggers.listen(8080).then(() => console.log("Listening!"));
 ```
 
 ### Middleware
@@ -61,7 +61,7 @@ Anyhow, to add middleware you can use the `$` key, with an array of middlewares.
 ```js
 import { express } from "coggers/compat";
 import cookieParser from "cookie-parser";
-const app = new Coggers({
+const coggers = new Coggers({
 	// express() turns express-based middleware into coggers middleware.
 	$: [express(cookieParser())],
 	$get(req, res, params) {
@@ -94,9 +94,9 @@ export const users = {
 ```
 
 ```js
-// app.js
+// main.js
 import { users } from "./users.js";
-const app = new Coggers({
+const coggers = new Coggers({
 	users,
 });
 ```
@@ -132,7 +132,7 @@ import { Coggers, renderEngine } from "coggers";
 import { renderFile } from "poggies";
 // In CommonJS, path.join(__dirname, "views")
 const viewsDirectory = new URL("views", import.meta.url);
-const app = new Coggers({
+const coggers = new Coggers({
 	// Poggies files end with ".pog", so "pog" here ⬇️
 	$: [renderEngine(renderFile, viewsDirectory, "pog")],
 	users: {

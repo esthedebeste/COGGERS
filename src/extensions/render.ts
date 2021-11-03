@@ -58,7 +58,7 @@ export function renderEngine(
 	);
 	const cache = new Map<string, string | null>();
 	return (_req, res) => {
-		res.render = (file, data, options) => {
+		res.render = (file, data = {}, options = {}) => {
 			const resolved = resolveFile(dir, file, ext, cache);
 			if (resolved == null)
 				throw new Error(

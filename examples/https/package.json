@@ -1,0 +1,12 @@
+{
+	"name": "https-example",
+	"main": "./src/main.js",
+	"type": "module",
+	"scripts": {
+		"start": "node ./src/main.js"
+	},
+	"dependencies": {
+		"coggers": "file:../.."
+	},
+	"private": true
+}

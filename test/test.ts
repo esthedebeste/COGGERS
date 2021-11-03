@@ -69,6 +69,6 @@ const server = new Coggers(
 	}
 );
 const port = process.env.PORT ?? 8080;
-server.listen(port).then(() => {
-	console.log(`Listening on https://localhost:${port}/`);
-});
+server
+	.listen(port)
+	.then(() => console.log(`Listening on https://localhost:${port}/`));

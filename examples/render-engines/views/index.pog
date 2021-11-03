@@ -1,0 +1,11 @@
+html {
+  head {
+    title[>titleText]
+  }
+  body {
+    p[Welcome to the render engine example!]
+    p[Of course, Coggers is compatible with many other render engines, aside from poggies.]
+    p[For example, for EJS, you'll want to input ]{ code[ejs.renderFile] }[ instead of ]{ code[poggies.renderFile] }
+    p[Coggers is compatible with express-style render engines, so ]{ code[ejs.__express] }[ would also work.]
+  }
+}

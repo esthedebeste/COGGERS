@@ -1,0 +1,13 @@
+{
+	"name": "render-engine-example",
+	"main": "./src/main.js",
+	"type": "module",
+	"scripts": {
+		"start": "node ./src/main.js"
+	},
+	"dependencies": {
+		"coggers": "file:../..",
+		"poggies": "^0.3.1"
+	},
+	"private": true
+}
