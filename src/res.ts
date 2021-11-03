@@ -1,7 +1,8 @@
 import { lookup, mime } from "filename2mime";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { PathLike, readFileSync } from "node:fs";
 import { ServerResponse } from "node:http";
+import * as cookie from "./cookie";
 import { ResRender } from "./extensions/render";
 import { Request } from "./req";
 
@@ -84,11 +85,22 @@ export class Response extends ServerResponse {
 		else this.json(data);
 	}
 
-	sendFile(file: string): void {
-		this.headers["Content-Type"] ??= lookup(file);
+	sendFile(file: PathLike): void {
+		this.headers["Content-Disposition"] = "inline";
+		this.headers["Content-Type"] ??= lookup(file.toString());
 		// TODO: Make this work with streams again.
 		const data = readFileSync(file);
 		this.etagEnd(data);
+	}
+
+	/**
+	 * Will prompt the browser for a "Save-As" screen.
+	 * @param as The name of the file the browser will save
+	 */
+	download(file: PathLike, as: string): void {
+		this.headers["Content-Disposition"] = `attachment; filename=${as}`;
+		this.headers["Content-Type"] ??= lookup(as);
+		this.etagEnd(readFileSync(file));
 	}
 
 	set(headers: Record<string, string | number | string[]>): this;
@@ -110,6 +122,14 @@ export class Response extends ServerResponse {
 	type(type: string): this {
 		if (type.includes("/")) this.headers["Content-Type"] = type;
 		else if (mime[type]) this.headers["Content-Type"] = mime[type];
+		return this;
+	}
+
+	cookie(name: string, value: string, options: cookie.Options = {}): this {
+		const newCookie = cookie.serialize(name, value, options);
+		const cookies = this.headers["Set-Cookie"] as null | string[];
+		if (cookies == null) this.headers["Set-Cookie"] = [newCookie];
+		else cookies.push(newCookie);
 		return this;
 	}
 

@@ -51,22 +51,26 @@ In Coggers, middleware does _not_ have a next() function. [More info](#middlewar
 
 Anyhow, to add middleware you can use the `$` key, with an array of middlewares.
 
+<details>
+	<summary>Note</summary>
+	<small>
+		Coggers comes with cookie-parsing built in, so the cookie-parser middleware isn't necessary. This is just to show an example of how you can define middleware.
+	</small>
+</details><br>
+
 ```js
 import { express } from "coggers/compat";
 import cookieParser from "cookie-parser";
 const app = new Coggers({
-	// $$id is the same as :id
-	$$id: {
-		// express() turns express-based middleware into coggers middleware.
-		$: [express(cookieParser())],
-		$get(req, res, params) {
-			const user = database.getUser(req.cookies.id);
-			res.send(user);
-		},
-		$post(req, res, params) {
-			const user = database.createUser(req.cookies.id);
-			res.send(user);
-		},
+	// express() turns express-based middleware into coggers middleware.
+	$: [express(cookieParser())],
+	$get(req, res, params) {
+		const user = database.getUser(req.cookies.id);
+		res.send(user);
+	},
+	$post(req, res, params) {
+		const user = database.createUser(req.cookies.id);
+		res.send(user);
 	},
 });
 ```

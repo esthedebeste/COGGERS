@@ -1,13 +1,12 @@
 import { lookup } from "filename2mime";
 import { IncomingMessage } from "node:http";
 import { Accept } from "./accept";
+import * as cookie from "./cookie";
 
 export class Request extends IncomingMessage {
 	private _accept: Accept;
 	private get accept() {
-		if (this._accept == null)
-			this._accept = new Accept(this.headers.accept ?? "");
-		return this._accept;
+		return (this._accept ??= new Accept(this.headers.accept ?? ""));
 	}
 
 	purl: URL;
@@ -17,6 +16,7 @@ export class Request extends IncomingMessage {
 	host: string;
 	hostname: string;
 	ip: string;
+	cookies: Record<string, string>;
 	_init(): this {
 		// @ts-ignore exists on TLSSocket
 		this.secure = this.socket.encrypted ?? false;
@@ -29,6 +29,7 @@ export class Request extends IncomingMessage {
 		this.host = this.purl.host;
 		this.hostname = this.purl.hostname;
 		this.query = Object.fromEntries(this.purl.searchParams);
+		this.cookies = this.headers.cookie ? cookie.parse(this.headers.cookie) : {};
 		return this;
 	}
 
