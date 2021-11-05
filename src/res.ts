@@ -98,7 +98,7 @@ export class Response extends ServerResponse {
 	 * @param as The name of the file the browser will save
 	 */
 	download(file: PathLike, as: string): void {
-		this.headers["Content-Disposition"] = `attachment; filename=${as}`;
+		this.headers["Content-Disposition"] = `attachment; filename="${as}"`;
 		this.headers["Content-Type"] ??= lookup(as);
 		this.etagEnd(readFileSync(file));
 	}

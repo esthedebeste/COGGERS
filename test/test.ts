@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:https";
 import * as poggies from "poggies";
 import { Coggers, renderEngine } from "../src/coggers.js";
-// @ts-ignore
 const url = import.meta.url;
 const viewsDir = new URL("views", url);
 
@@ -39,7 +38,7 @@ const server = new Coggers(
 		params: {
 			$$param: {
 				$: [renderEngine(ejs.__express, viewsDir, "ejs")],
-				$get(req, res, { param }) {
+				$get(_req, res, { param }) {
 					res.render("params", { param });
 				},
 			},
@@ -55,7 +54,7 @@ const server = new Coggers(
 			},
 		},
 		download: {
-			$get(req, res) {
+			$get(_req, res) {
 				res.download(new URL("public/hi.html", url), "hi.html");
 			},
 		},

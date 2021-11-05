@@ -6,7 +6,7 @@ import { Blueprint, Coggers, Handler } from "../src/coggers";
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const createCreateFetch = (test: Test) => {
 	const servers: Server[] = [];
-	test.after.each(() => {
+	test.after(() => {
 		while (servers.length) servers.pop().close();
 	});
 	return async (

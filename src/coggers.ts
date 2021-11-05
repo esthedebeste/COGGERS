@@ -11,7 +11,7 @@ export class Coggers<
 	// @ts-ignore
 	SC extends (...args) => Server = typeof http.createServer
 > extends Node {
-	protected options: ConstructorParameters<typeof Coggers>[1];
+	protected options: Options;
 	server: Server;
 	constructor(
 		blueprint: Blueprint,
