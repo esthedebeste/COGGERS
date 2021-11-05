@@ -3,7 +3,7 @@ import * as poggies from "poggies";
 const viewsDirectory = new URL("../views", import.meta.url);
 
 const coggers = new Coggers({
-	// Poggies files end with ".pog", so "pog" here ⬇️
+	// Poggies files end with ".pog", so "pog" here       ⬇️
 	$: [renderEngine(poggies.renderFile, viewsDirectory, "pog")],
 	$get(req, res) {
 		res.render("index", {

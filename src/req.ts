@@ -40,7 +40,6 @@ export class Request extends IncomingMessage {
 		return this.header(header);
 	}
 
-	/** Checks if requester would be fine with this mime. */
 	acceptsMime(mime: string): boolean {
 		return this.accept.accepts(mime);
 	}

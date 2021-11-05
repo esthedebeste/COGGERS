@@ -125,36 +125,21 @@ const blue: Blueprint = {
 
 ### Render Engines
 
-Render engines are defined using the renderEngine middleware. Example:
+Render engines are defined using the renderEngine middleware. [Full example here](./examples/render-engines)
 
 ```js
 import { Coggers, renderEngine } from "coggers";
 import { renderFile } from "poggies";
-// In CommonJS, path.join(__dirname, "views")
 const viewsDirectory = new URL("views", import.meta.url);
 const coggers = new Coggers({
 	// Poggies files end with ".pog", so "pog" here ⬇️
 	$: [renderEngine(renderFile, viewsDirectory, "pog")],
-	users: {
-		$get(req, res, params) {
-			const user = database.getUser(params.id);
-			res.render("user", { user });
-		},
+	$get(req, res) {
+		res.render("index", {
+			random: Math.random(),
+		});
 	},
 });
-```
-
-/views/user.pog looks like this:
-
-```
-html {
-  head {
-    title[>`Hi, ${user.name}`]
-  }
-  body {
-    p[>`Hi, ${user.name}`]
-  }
-}
 ```
 
 ##### Middleware note

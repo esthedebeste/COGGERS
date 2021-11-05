@@ -76,7 +76,7 @@ export class Response extends ServerResponse {
 		this.etagEnd(data);
 	}
 
-	send(data: unknown): void {
+	send(data?: unknown): void {
 		if (data instanceof Uint8Array) {
 			this.headers["Content-Type"] ??= "application/octet-stream";
 			this.etagEnd(data);

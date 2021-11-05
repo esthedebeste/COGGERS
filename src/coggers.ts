@@ -4,16 +4,12 @@ import { Node } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
 import type { Blueprint, Handler, Params } from "./utils";
-export type Options = {
-	/** Defaults to "COGGERS" */
-	xPoweredBy?: string | false;
-	/** Defaults to `res.status(404).send("Not Found")` */
-	notFound?: Handler;
-};
+export type Options = ConstructorParameters<typeof Coggers>[1];
 
 export class Coggers<
-	Server extends http.Server | https.Server,
-	ServerCreator extends (...args) => Server
+	Server extends http.Server | https.Server = http.Server,
+	// @ts-ignore
+	SC extends (...args) => Server = typeof http.createServer
 > extends Node {
 	protected options: ConstructorParameters<typeof Coggers>[1];
 	server: Server;
@@ -25,9 +21,9 @@ export class Coggers<
 			/** Defaults to `res.status(404).send("Not Found")` */
 			notFound?: Handler;
 			/** http.createServer, https.createServer, etc. */
-			serverCreator?: ServerCreator;
+			serverCreator?: SC;
 			/** Arguments to http.createServer, https.createServer, etc. */
-			createServerArgs?: Parameters<ServerCreator>[0];
+			createServerArgs?: Parameters<SC>[0];
 		}
 	) {
 		super(blueprint);
