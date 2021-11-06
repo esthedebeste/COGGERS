@@ -11,7 +11,7 @@ export type Handler<Params extends string = never> = (
 	req: Request,
 	res: Response,
 	params: Record<Params, string>
-) => void;
+) => Promise<void> | void;
 export type Middleware<Params extends string = never> = Handler<Params>;
 
 /** From import("node:http").METHODS */

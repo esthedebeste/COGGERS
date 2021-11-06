@@ -1,4 +1,4 @@
-<div align="center"><img alt="COGGERS" height="120" src="https://cdn.betterttv.net/emote/5ab6f0ece1d6391b63498774/3x"></div>
+<div align="center"><img alt="COGGERS" height="120" src="./tests/assets/coggers.gif"></div>
 
 # Coggers
 

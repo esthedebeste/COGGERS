@@ -1,5 +1,5 @@
 import * as filename2mime from "filename2mime";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 import { test } from "uvu";
 import * as assert from "uvu/assert";
 import { createFetch } from "./utils";

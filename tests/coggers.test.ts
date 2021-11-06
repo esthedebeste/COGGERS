@@ -1,7 +1,7 @@
-import { readFileSync } from "fs";
-import * as https from "https";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from "node:fs";
+import * as https from "node:https";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { suite } from "uvu";
 import * as assert from "uvu/assert";
 import { createFetch } from "./utils";

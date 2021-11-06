@@ -13,7 +13,7 @@ html {
   }
   body {
     p[Coggers test :D]
-    img(src=https://cdn.betterttv.net/emote/5ab6f0ece1d6391b63498774/3x alt=COGGERS)
+    img(src="./coggers.gif" alt=COGGERS)
     br
     i[served from poggies :D]
   }
