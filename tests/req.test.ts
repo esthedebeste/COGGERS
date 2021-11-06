@@ -1,7 +1,6 @@
 import { test } from "uvu";
 import * as assert from "uvu/assert";
-import { createCreateFetch } from "./utils";
-const createFetch = createCreateFetch(test);
+import { createFetch } from "./utils";
 
 test("Header Methods", async () => {
 	const date = new Date().toUTCString();
@@ -18,41 +17,39 @@ test("Header Methods", async () => {
 			Date: date,
 		},
 	}).expect(200);
+	fetch.close();
 });
 
 test("Static Fields", async () => {
-	const fetch = await createFetch({
-		$get(req, res) {
-			assert.instance(req.purl, URL);
-			assert.ok(/^localhost:\d+$/.test(req.host));
-			assert.equal(req.hostname, "localhost");
-			assert.equal(req.query.test, "foo");
-			assert.ok(req.ip.includes("127.0.0.1"));
-			assert.equal(req.secure, false);
-			assert.equal(req.protocol, "http");
-			res.end();
-		},
+	const fetch = await createFetch((req, res) => {
+		assert.instance(req.purl, URL);
+		assert.ok(/^localhost:\d+$/.test(req.host));
+		assert.equal(req.hostname, "localhost");
+		assert.equal(req.query.test, "foo");
+		assert.ok(req.ip.includes("127.0.0.1"));
+		assert.equal(req.secure, false);
+		assert.equal(req.protocol, "http");
+		res.end();
 	});
 
 	await fetch("/?test=foo").expect(200);
+	fetch.close();
 });
 
 test("Accept header parsing", async () => {
-	const fetch = await createFetch({
-		$get(req, res) {
-			const html = req.acceptsMime("text/html");
-			const txt = req.acceptsMime("text/plain");
-			const pref = req.preferredMime([
-				"text/html",
-				"text/plain",
-				"application/json",
-			]);
-			req.format({
-				html: () => res.end(`<b>HTML: ${html}, TXT: ${txt}, PREF: ${pref}</b>`),
-				json: () => res.end(JSON.stringify({ html, txt, pref })),
-				default: () => res.end(`HTML: ${html}, TXT: ${txt}, PREF: ${pref}`),
-			});
-		},
+	const fetch = await createFetch((req, res) => {
+		const html = req.acceptsMime("text/html");
+		const txt = req.acceptsMime("text/plain");
+		const pref = req.preferredMime([
+			"text/html",
+			"text/plain",
+			"application/json",
+		]);
+		req.format({
+			html: () => res.end(`<b>HTML: ${html}, TXT: ${txt}, PREF: ${pref}</b>`),
+			json: () => res.end(JSON.stringify({ html, txt, pref })),
+			default: () => res.end(`HTML: ${html}, TXT: ${txt}, PREF: ${pref}`),
+		});
 	});
 	await fetch("/", {
 		headers: {
@@ -76,19 +73,15 @@ test("Accept header parsing", async () => {
 	await fetch("/", { headers: { accept: "text/html" } }).expect(
 		`<b>HTML: true, TXT: false, PREF: text/html</b>`
 	);
-
 	await fetch("/", { headers: { accept: "image/png" } }).expect(
 		// Unknown => default.
 		`HTML: false, TXT: false, PREF: undefined`
 	);
+	fetch.close();
 });
 
 test("Cookie parsing", async () => {
-	const fetch = await createFetch({
-		$get(req, res) {
-			res.end(req.cookies.test);
-		},
-	});
+	const fetch = await createFetch((req, res) => res.end(req.cookies.test));
 	await fetch("/", {
 		headers: {
 			cookie: "test=foo",
@@ -99,6 +92,7 @@ test("Cookie parsing", async () => {
 			cookie: "a=3; test=foo; b=5",
 		},
 	}).expect("foo");
+	fetch.close();
 });
 
 test.run();

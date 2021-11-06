@@ -77,29 +77,9 @@ const coggers = new Coggers({
 
 ### Modularity
 
-As Coggers is fully object-based, modularity is simpler than ever. All you need to do is export a part of a blueprint from file A, and then you can import that in file B and simply put it right in. For example:
+As Coggers is fully object-based, modularity is simpler than ever. All you need to do is export a part of a blueprint from file A, and then you can import that in file B and simply put it right in.
 
-```js
-// users.js
-export const users = {
-	$get(req, res, params) {
-		const user = database.getUser(params.id);
-		res.send(user);
-	},
-	$post(req, res, params) {
-		const user = database.createUser(params.id);
-		res.send(user);
-	},
-};
-```
-
-```js
-// main.js
-import { users } from "./users.js";
-const coggers = new Coggers({
-	users,
-});
-```
+[Example](./examples/modularity)
 
 ### Intellisense
 

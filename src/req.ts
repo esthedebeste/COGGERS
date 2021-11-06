@@ -6,7 +6,7 @@ import * as cookie from "./cookie";
 export class Request extends IncomingMessage {
 	private _accept: Accept;
 	private get accept() {
-		return (this._accept ??= new Accept(this.headers.accept ?? ""));
+		return (this._accept ||= new Accept(this.headers.accept || ""));
 	}
 
 	purl: URL;
@@ -19,12 +19,12 @@ export class Request extends IncomingMessage {
 	cookies: Record<string, string>;
 	_init(): this {
 		// @ts-ignore exists on TLSSocket
-		this.secure = this.socket.encrypted ?? false;
+		this.secure = this.socket.encrypted || false;
 		this.protocol = this.secure ? "https" : "http";
 		this.ip = this.socket.remoteAddress;
 		this.purl = new URL(
 			this.url,
-			`${this.protocol}://${this.headers.host ?? this.headers[":authority"]}`
+			`${this.protocol}://${this.headers.host || this.headers[":authority"]}`
 		);
 		this.host = this.purl.host;
 		this.hostname = this.purl.hostname;

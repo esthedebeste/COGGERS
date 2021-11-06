@@ -67,18 +67,21 @@ export class Response extends ServerResponse {
 	}
 
 	json(data: unknown): void {
-		this.headers["Content-Type"] ??= "application/json; charset=UTF-8";
+		if (this.headers["Content-Type"] == null)
+			this.headers["Content-Type"] = "application/json; charset=UTF-8";
 		this.etagEnd(JSON.stringify(data));
 	}
 
 	html(data: string): void {
-		this.headers["Content-Type"] ??= "text/html; charset=UTF-8";
+		if (this.headers["Content-Type"] == null)
+			this.headers["Content-Type"] = "text/html; charset=UTF-8";
 		this.etagEnd(data);
 	}
 
 	send(data?: unknown): void {
 		if (data instanceof Uint8Array) {
-			this.headers["Content-Type"] ??= "application/octet-stream";
+			if (this.headers["Content-Type"] == null)
+				this.headers["Content-Type"] = "application/octet-stream";
 			this.etagEnd(data);
 		} else if (typeof data === "string") this.html(data);
 		else if (data == null) this.end();
@@ -87,7 +90,8 @@ export class Response extends ServerResponse {
 
 	sendFile(file: PathLike): void {
 		this.headers["Content-Disposition"] = "inline";
-		this.headers["Content-Type"] ??= lookup(file.toString());
+		if (this.headers["Content-Type"] == null)
+			this.headers["Content-Type"] = lookup(file.toString());
 		// TODO: Make this work with streams again.
 		const data = readFileSync(file);
 		this.etagEnd(data);
@@ -99,7 +103,8 @@ export class Response extends ServerResponse {
 	 */
 	download(file: PathLike, as: string): void {
 		this.headers["Content-Disposition"] = `attachment; filename="${as}"`;
-		this.headers["Content-Type"] ??= lookup(as);
+		if (this.headers["Content-Type"] == null)
+			this.headers["Content-Type"] = lookup(as);
 		this.etagEnd(readFileSync(file));
 	}
 

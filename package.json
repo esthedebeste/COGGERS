@@ -1,14 +1,14 @@
 {
 	"name": "coggers",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "we go **fast**",
 	"main": "./dist/coggers.js",
 	"types": "./dist/coggers.d.ts",
 	"scripts": {
 		"build": "rollup -c",
-		"format": "prettier -w ./src && eslint --fix .",
+		"format": "prettier -w ./src",
 		"test": "uvu -r tsm tests .test.ts$",
-		"prepack": "npm run format && npm run build && prettier -w ./dist"
+		"prepack": "npm run test && npm run format && npm run build && prettier -w ./dist"
 	},
 	"keywords": [],
 	"author": "",
