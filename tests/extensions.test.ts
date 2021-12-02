@@ -13,7 +13,7 @@ test("Static Extension", async () => {
 	});
 	await fetch("/assets/static.txt")
 		.expect(200, "Hello World!")
-		.expectHeader("Content-Type", "text/plain");
+		.expectHeader("Content-Type", /text\/plain/);
 	fetch.close();
 });
 

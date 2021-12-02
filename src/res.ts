@@ -13,6 +13,12 @@ const weakETag = (
 ): string =>
 	`W/"${createHash(hash).update(data).digest("base64url").slice(0, size)}"`;
 
+const isText = (mime: string): boolean =>
+	mime.startsWith("text/") ||
+	mime === "application/json" ||
+	mime.endsWith("+xml") ||
+	mime.endsWith("+json");
+
 export class Response extends ServerResponse {
 	/** Provided by node, a reference to the Request object. */
 	req: Request;
@@ -88,11 +94,18 @@ export class Response extends ServerResponse {
 		else this.json(data);
 	}
 
-	sendFile(file: PathLike): void {
+	sendFile(
+		file: PathLike,
+		{ charset = "UTF-8" }: { charset?: false | string } = {}
+	): void {
 		this.headers["Content-Disposition"] = "inline";
-		if (this.headers["Content-Type"] == null)
-			this.headers["Content-Type"] = lookup(file.toString());
-		// TODO: Make this work with streams again.
+
+		if (this.headers["Content-Type"] == null) {
+			const type = lookup(file.toString());
+			this.headers["Content-Type"] = type;
+			if (charset && isText(type))
+				this.headers["Content-Type"] += "; charset=" + charset;
+		}
 		const data = readFileSync(file);
 		this.etagEnd(data);
 	}
