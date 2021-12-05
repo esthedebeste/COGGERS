@@ -21,15 +21,16 @@ test("Render Extension", async () => {
 	const fetch = await createFetch({
 		ext: {
 			$: renderEngine(renderFile, assets, "pog"),
-			$get: (_req, res) => res.render("index"),
+			$get: (_req, res) => res.render("index", {}, { doctype: false }),
 		},
 		extless: {
 			$: renderEngine(renderFile, assets),
-			$get: (_req, res) => res.render("index.pog"),
+			$get: (_req, res) => res.render("index.pog", {}, { doctype: false }),
 		},
 		params: {
 			$: renderEngine(renderFile, assets, "pog"),
-			$get: (_req, res) => res.render("params", { name: "World" }),
+			$get: (_req, res) =>
+				res.render("params", { name: "World" }, { doctype: false }),
 		},
 	});
 	await fetch("/ext").expect(200, "<i>served from poggies :D</i>");

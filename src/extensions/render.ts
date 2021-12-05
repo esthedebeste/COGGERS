@@ -18,8 +18,8 @@ type RenderFunction =
 
 export type ResRender = (
 	file: string,
-	data?: Record<string, string>,
-	options?: Record<string, string>
+	data?: Record<string, unknown>,
+	options?: Record<string, unknown>
 ) => void;
 
 function resolveFile(
