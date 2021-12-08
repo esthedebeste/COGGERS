@@ -7,7 +7,7 @@
 	},
 	"dependencies": {
 		"coggers": "file:../..",
-		"poggies": "^0.3.1"
+		"poggies": "^1.1.0"
 	},
 	"private": true
 }
