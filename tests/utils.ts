@@ -2,18 +2,16 @@ import { RequestListener, Server, ServerOptions } from "node:http";
 import { FetchFunction, makeFetch } from "supertest-fetch";
 import { Blueprint, Coggers, Handler } from "../src/coggers";
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
 export async function createFetch(
 	blueprint: Blueprint | Handler,
 	options?: {
-		xPoweredBy?: string | false;
-		notFound?: Handler<never>;
-		serverCreator?: (
-			options: ServerOptions,
-			requestListener?: RequestListener
-		) => Server;
+		serverCreator?: {
+			(requestListener?: RequestListener): Server;
+			(options: ServerOptions, requestListener?: RequestListener): Server;
+		};
 		createServerArgs?: ServerOptions;
+		notFound?: Handler;
+		xPoweredBy?: string | false;
 	}
 ): Promise<FetchFunction & { close?: () => void }> {
 	const server = await new Coggers(

@@ -1,0 +1,16 @@
+{
+	"name": "middleware-example",
+	"main": "./dist/main.js",
+	"scripts": {
+		"start": "node ./dist/main.js",
+		"build": "tsc"
+	},
+	"type": "module",
+	"dependencies": {
+		"coggers": "file:../.."
+	},
+	"devDependencies": {
+		"typescript": "^4.5.2"
+	},
+	"private": true
+}

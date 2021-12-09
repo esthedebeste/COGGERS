@@ -1,6 +1,6 @@
 {
 	"name": "coggers",
-	"version": "1.5.3",
+	"version": "1.5.4",
 	"description": "we go **fast**",
 	"main": "./dist/coggers.js",
 	"types": "./dist/coggers.d.ts",

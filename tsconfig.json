@@ -1,12 +1,8 @@
 {
-	"ts-node": {
-		"transpileOnly": true
-	},
 	"compilerOptions": {
 		"target": "ES2019",
 		"module": "ESNext",
 		"outDir": "dist",
-		"baseUrl": "src",
 		"isolatedModules": true,
 		"downlevelIteration": true,
 		"noImplicitAny": false,

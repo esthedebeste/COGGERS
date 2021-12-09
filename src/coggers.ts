@@ -1,5 +1,4 @@
 import * as http from "node:http";
-import type * as https from "node:https";
 import { Node } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
@@ -7,12 +6,12 @@ import type { Blueprint, Handler, Params } from "./utils";
 export type Options = ConstructorParameters<typeof Coggers>[1];
 
 export class Coggers<
-	Server extends http.Server | https.Server = http.Server,
-	// @ts-ignore
-	SC extends (...args) => Server = typeof http.createServer
+	SC extends (...args) => {
+		listen(opts: { port: number | string; host: string }, cb: () => void): void;
+	} = typeof http.createServer
 > extends Node {
 	protected options: Options;
-	server: Server;
+	server: ReturnType<SC>;
 	constructor(
 		blueprint: Blueprint,
 		options?: {
@@ -67,7 +66,7 @@ export class Coggers<
 		});
 	}
 
-	listen(port: number | string, host?: string): Promise<Server> {
+	listen(port: number | string, host?: string): Promise<ReturnType<SC>> {
 		return new Promise(resolve => {
 			this.server.listen(
 				{

@@ -1,5 +1,5 @@
 import { blueprint } from "coggers";
-let users = {
+const db = {
 	foo: `User with ID foo, ${Math.random().toFixed(3)}`,
 };
 
@@ -9,11 +9,12 @@ export const users = blueprint({
 	// $$id is the same as :id
 	$$id: {
 		$get(req, res, { id }) {
-			const user = users[id];
+			const user = db[id];
 			res.send(user);
 		},
 		$post(req, res, { id }) {
-			users[id] = `User with ID ${id}, ${Math.random().toFixed(3)}`;
+			const user = `User with ID ${id}, ${Math.random().toFixed(3)}`;
+			db[id] = user;
 			res.send(user);
 		},
 	},
