@@ -32,7 +32,7 @@ export class Accept {
 	constructor(accept: string) {
 		for (const part of accept.matchAll(chunkRe)) {
 			const mimes = part[1].split(",").map(a => a.trim());
-			const q = part[2] ? parseFloat(part[2]) : 1;
+			const q = part[2] ? Number(part[2]) : 1;
 			for (const mime of mimes) this.mimes.push(parseMime(mime, q));
 		}
 		// Reverse weight sort (highest first)
@@ -58,6 +58,6 @@ export class Accept {
 
 	accepts(mime: string): boolean {
 		const parsed = parseMime(mime);
-		return !!this.mimes.find(mime => eq(mime, parsed));
+		return this.mimes.some(mime => eq(mime, parsed));
 	}
 }

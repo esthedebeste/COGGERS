@@ -6,6 +6,7 @@
 	"extends": [
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
+		"plugin:unicorn/recommended",
 		"prettier"
 	],
 	"parser": "@typescript-eslint/parser",
@@ -13,9 +14,11 @@
 		"ecmaVersion": 12,
 		"sourceType": "module"
 	},
-	"plugins": ["@typescript-eslint"],
+	"plugins": ["@typescript-eslint", "unicorn"],
 	"rules": {
-		"@typescript-eslint/ban-ts-comment": "off"
+		"@typescript-eslint/ban-ts-comment": "off",
+		"unicorn/prevent-abbreviations": "off",
+		"unicorn/no-null": "off"
 	},
 	"root": true,
 	"ignorePatterns": "**/*.js"

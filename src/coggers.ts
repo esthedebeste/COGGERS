@@ -84,5 +84,6 @@ export const blueprint = (blueprint: Blueprint): Blueprint => blueprint;
 export default Coggers;
 export { express } from "./compat";
 export * from "./extensions/mod";
+export { Request } from "./req";
+export { Response } from "./res";
 export type { Blueprint, Handler, HTTPMethod, Middleware } from "./utils";
-export { Request, Response };

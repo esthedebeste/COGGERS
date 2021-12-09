@@ -1,12 +1,8 @@
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { renderFile } from "poggies";
 import { test } from "uvu";
 import { renderEngine, serveStatic } from "../src/coggers";
 import { createFetch } from "./utils";
-
-const _filename = import.meta.url ? fileURLToPath(import.meta.url) : __filename;
-const assets = join(dirname(_filename), "assets");
+const assets = new URL("assets", import.meta.url);
 test("Static Extension", async () => {
 	const fetch = await createFetch({
 		assets: serveStatic(assets),

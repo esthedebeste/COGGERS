@@ -9,7 +9,7 @@ import { Request } from "./req";
 const weakETag = (
 	data: string | Uint8Array,
 	// TODO?: Make ETags more customizable?
-	{ hash, size } = { hash: "sha1", size: 32 }
+	{ hash = "sha1", size = 32 } = {}
 ): string =>
 	`W/"${createHash(hash).update(data).digest("base64url").slice(0, size)}"`;
 

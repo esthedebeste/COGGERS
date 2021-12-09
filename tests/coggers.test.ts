@@ -1,14 +1,8 @@
 import { readFileSync } from "node:fs";
 import * as https from "node:https";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { suite } from "uvu";
 import * as assert from "uvu/assert";
 import { createFetch } from "./utils";
-// TSM seems to compile to CJS, so import.meta.url doesn't exist on runtime.
-const _dirname = import.meta.url
-	? dirname(fileURLToPath(import.meta.url))
-	: __dirname;
 
 const options = suite("Options");
 options("HTTPS", async () => {
@@ -20,8 +14,8 @@ options("HTTPS", async () => {
 		{
 			serverCreator: https.createServer,
 			createServerArgs: <https.ServerOptions>{
-				cert: readFileSync(join(_dirname, "https", "cert.pem")),
-				key: readFileSync(join(_dirname, "https", "key.pem")),
+				cert: readFileSync(new URL("https/cert.pem", import.meta.url)),
+				key: readFileSync(new URL("https/key.pem", import.meta.url)),
 			},
 		}
 	);

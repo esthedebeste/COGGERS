@@ -2,6 +2,7 @@ import { Request } from "./req";
 import { Response } from "./res";
 import { Blueprint, Handler, METHODS, Middleware, Params, Path } from "./utils";
 
+const Inf = Number.POSITIVE_INFINITY;
 export class Node {
 	private methods: Partial<Record<METHODS, Handler[]>> = {};
 	private middlewares: Middleware[] = [];
@@ -9,15 +10,13 @@ export class Node {
 	private wild: Wildcard;
 	constructor(blueprint: Blueprint) {
 		for (const key in blueprint)
-			if (key === "$") this.middlewares = [blueprint[key]].flat(Infinity);
+			if (key === "$") this.middlewares = [blueprint[key]].flat(Inf);
 			// Both : and $$ are supported for wildcards because { $$wild } looks better than { ":wild": wild }.
 			// Also, you can't export a variable that starts with a :
 			else if (key.startsWith(":") || key.startsWith("$$"))
 				this.wild = new Wildcard(blueprint[key], key.replace(/^:|\$\$/, ""));
 			else if (key.startsWith("$"))
-				this.methods[key.slice(1).toUpperCase()] = [blueprint[key]].flat(
-					Infinity
-				);
+				this.methods[key.slice(1).toUpperCase()] = [blueprint[key]].flat(Inf);
 			else this.children[key] = new Node(blueprint[key]);
 	}
 	protected async pass(

@@ -1,10 +1,7 @@
 import * as filename2mime from "filename2mime";
-import { fileURLToPath } from "node:url";
 import { test } from "uvu";
 import * as assert from "uvu/assert";
 import { createFetch } from "./utils";
-// TSM seems to compile to CJS, so import.meta.url doesn't exist on runtime.
-const _filename = import.meta.url ? fileURLToPath(import.meta.url) : __filename;
 test("Header Methods / Header Proxy", async () => {
 	const fetch = await createFetch((req, res) => {
 		switch (req.url) {
@@ -62,9 +59,9 @@ test("Send functions", async () => {
 			case "/html":
 				return res.html("<b>Foo: bar</b>");
 			case "/download":
-				return res.download(_filename, "res.test.ts");
+				return res.download(new URL(import.meta.url), "res.test.ts");
 			case "/file":
-				return res.sendFile(_filename);
+				return res.sendFile(new URL(import.meta.url));
 			default:
 				res.send("Invalid path");
 		}

@@ -22,24 +22,20 @@ export type ResRender = (
 	options?: Record<string, unknown>
 ) => void;
 
-function resolveFile(
-	dir: string,
-	file: string,
-	ext: string | null,
-	cache: Map<string, string | null>
-): string {
-	/* Maps don't do deep equality */
-	const cacheName = JSON.stringify([dir, file, ext]);
-	if (cache.has(cacheName)) return cache.get(cacheName);
-	let options = [join(dir, file)];
-	if (ext) options = [...options, join(dir, file + "." + ext)];
-	for (const option of options)
-		if (existsSync(option)) {
-			cache.set(cacheName, option);
-			return option;
-		}
-	return null;
-}
+const resolver = (dir: string, ext?: string) => {
+	const cache = new Map<string, string>();
+	return (file: string): string => {
+		if (cache.has(file)) return cache.get(file);
+		const options = [join(dir, file)];
+		if (ext) options.push(join(dir, file + ext));
+		for (const option of options)
+			if (existsSync(option)) {
+				cache.set(file, option);
+				return option;
+			}
+		throw new Error(`res.render: ${options.join(", or ")} not found.`);
+	};
+};
 
 /**
  * @param renderFunction Function used for rendering. Often called renderFile
@@ -53,30 +49,24 @@ export function renderEngine(
 	directory: string | URL,
 	ext?: string
 ): Middleware {
+	if (ext && ext[0] !== ".") ext = "." + ext;
 	const dir = resolve(
 		directory instanceof URL ? fileURLToPath(directory) : directory
 	);
-	const cache = new Map<string, string | null>();
+	const resolveFile = resolver(dir, ext);
 	return (_req, res) => {
-		res.render = (file, data = {}, options = {}) => {
-			const resolved = resolveFile(dir, file, ext, cache);
-			if (resolved == null)
-				throw new Error(
-					`renderEngine: ${file} with extension ${ext} not found in directory ${dir}`
-				);
-
-			const callback = (result: string) => res.send(result);
-			const promise = renderFunction(
+		res.render = async (file, data = {}, options = {}) => {
+			const resolved = resolveFile(file);
+			const result = await renderFunction(
 				resolved,
 				data,
 				options,
 				(err?: Error, result?: string) => {
 					if (err) throw err;
-					callback(result);
+					res.send(result);
 				}
 			);
-			if (promise instanceof Promise) promise.then(callback);
-			else if (typeof promise === "string") callback(promise);
+			if (typeof result === "string") res.send(result);
 		};
 	};
 }

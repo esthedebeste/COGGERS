@@ -1,4 +1,4 @@
-import { RequestListener, Server, ServerOptions } from "http";
+import { RequestListener, Server, ServerOptions } from "node:http";
 import { FetchFunction, makeFetch } from "supertest-fetch";
 import { Blueprint, Coggers, Handler } from "../src/coggers";
 

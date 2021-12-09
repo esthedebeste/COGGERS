@@ -7,18 +7,18 @@ const serveFile =
 	(_req, res) =>
 		res.sendFile(file);
 
-export const serveStatic = (folder: string | URL): Blueprint => {
-	if (typeof folder === "string") folder = pathToFileURL(folder);
+export const serveStatic = (dir: string | URL): Blueprint => {
+	if (typeof dir === "string") dir = pathToFileURL(dir);
 	// make sure the href points to a directory
-	folder.href += "/";
-	const files = readdirSync(folder, { withFileTypes: true });
+	dir.href += "/";
+	const files = readdirSync(dir, { withFileTypes: true });
 	const blueprint: Blueprint = {};
 	for (const file of files)
 		if (file.isDirectory()) {
-			blueprint[file.name] = serveStatic(new URL(file.name, folder));
+			blueprint[file.name] = serveStatic(new URL(file.name, dir));
 		} else if (file.isFile()) {
 			blueprint[file.name] = {
-				$get: serveFile(new URL(file.name, folder)),
+				$get: serveFile(new URL(file.name, dir)),
 			};
 		}
 	return blueprint;

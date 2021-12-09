@@ -5,10 +5,9 @@
 	"main": "./dist/coggers.js",
 	"types": "./dist/coggers.d.ts",
 	"scripts": {
-		"build": "rollup -c",
-		"format": "prettier -w ./src",
+		"build": "rollup -c && prettier -w ./dist",
 		"test": "tsm node_modules/uvu/bin.js tests .test.ts$",
-		"prepack": "npm run test && npm run format && npm run build && prettier -w ./dist"
+		"prepack": "npm run test && npm run build"
 	},
 	"keywords": [],
 	"author": "",
@@ -23,6 +22,7 @@
 		"@typescript-eslint/parser": "^4.33.0",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-unicorn": "^39.0.0",
 		"poggies": "^1.0.1",
 		"prettier": "^2.4.1",
 		"rollup": "^2.58.0",
