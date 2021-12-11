@@ -27,10 +27,7 @@ export class Response extends ServerResponse {
 		return new Proxy(
 			{},
 			{
-				/* Use lambdas instead of functions to make `this` refer to res and not the proxy */
-				get: (_, name: string) => {
-					return this.getHeader(name);
-				},
+				get: (_, name: string) => this.getHeader(name),
 				set: (_, name: string, value) => {
 					this.setHeader(name, value);
 					return true;
@@ -39,9 +36,7 @@ export class Response extends ServerResponse {
 					this.removeHeader(name);
 					return true;
 				},
-				has: (_, name: string) => {
-					return this.hasHeader(name);
-				},
+				has: (_, name: string) => this.hasHeader(name),
 			}
 		);
 	}

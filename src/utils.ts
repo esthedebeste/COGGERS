@@ -4,15 +4,18 @@ import { Response as Res } from "./res";
 /** middleware adds keys sometimes */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Extended = Record<any, any>;
-export type Params = Record<string, string>;
+export type Params<Added extends string = string> = Record<Added, string> & {
+	/** Remaining part of the URL */
+	$remaining: string;
+};
 export type Request = Req & Extended;
 export type Response = Res & Extended;
-export type Handler<Params extends string = never> = (
+export type Handler<P extends string = never> = (
 	req: Request,
 	res: Response,
-	params: Record<Params, string>
+	params: Params<P>
 ) => Promise<void> | void;
-export type Middleware<Params extends string = never> = Handler<Params>;
+export type Middleware<P extends string = never> = Handler<P>;
 
 /** From import("node:http").METHODS */
 export type METHODS =
@@ -51,18 +54,14 @@ export type METHODS =
 	| "UNLOCK"
 	| "UNSUBSCRIBE";
 export type HTTPMethod = Lowercase<METHODS>;
-export type Method = `$${HTTPMethod}`;
+export type Method = `$${HTTPMethod | "any"}`;
 export type Wildcard = `${":" | "$$"}${string}`;
 /* prettier-ignore */ /* temporary fix until there's a proper way to say that paths don't start with a $ */
 type urlchars = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m"|"-"|"."|"_"|"~"|"["|"]"|"@"|"!"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"%"|"=";
 type pathstart = Lowercase<urlchars> | Uppercase<urlchars>;
 export type Path = `${pathstart}${string}`;
-type Handlers<Params extends string> =
-	| Array<Handlers<Params>>
-	| Handler<Params>;
-type Middlewares<Params extends string> =
-	| Array<Middlewares<Params>>
-	| Middleware<Params>;
+type Handlers<P extends string> = Array<Handlers<P>> | Handler<P>;
+type Middlewares<P extends string> = Array<Middlewares<P>> | Middleware<P>;
 type extractParamName<raw> = raw extends `${"$$" | ":"}${infer R}` ? R : raw;
 export type Blueprint<Params extends string = never> = {
 	$?: Middlewares<Params>;

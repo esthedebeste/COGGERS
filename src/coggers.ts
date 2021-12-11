@@ -54,16 +54,20 @@ export class Coggers<
 		return this.handle(req, res);
 	}
 
-	protected handle(req: Request, res: Response): Promise<void> {
+	protected async handle(req: Request, res: Response): Promise<void> {
 		req._init();
+		// Below node v15.7.0
+		if (!res.req) res.req = req;
 		if (this.options.xPoweredBy !== false)
 			res.headers["X-Powered-By"] = this.options.xPoweredBy;
 		const path = req.purl.pathname.slice(1).split("/");
-		const params: Params = {};
-		return this.pass(path, req, res, params).catch(error => {
-			if (error === 404) this.options.notFound(req, res, params);
-			else throw error;
-		});
+		const params: Params = { $remaining: path.join("/") || "/" };
+		const notFound = this.options.notFound;
+		const handlers = this.pass(path, req, res, params, notFound);
+		for (const handler of handlers) {
+			await handler();
+			if (res.writableEnded) break;
+		}
 	}
 
 	listen(port: number | string, host?: string): Promise<ReturnType<SC>> {

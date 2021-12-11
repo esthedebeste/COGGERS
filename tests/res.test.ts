@@ -136,6 +136,4 @@ test("res.redirect", async () => {
 	fetch.close();
 });
 
-// res.render will be in the tests/extensions dir
-
 test.run();

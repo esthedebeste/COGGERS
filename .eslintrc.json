@@ -18,7 +18,8 @@
 	"rules": {
 		"@typescript-eslint/ban-ts-comment": "off",
 		"unicorn/prevent-abbreviations": "off",
-		"unicorn/no-null": "off"
+		"unicorn/no-null": "off",
+		"unicorn/prefer-spread": "off"
 	},
 	"root": true,
 	"ignorePatterns": "**/*.js"

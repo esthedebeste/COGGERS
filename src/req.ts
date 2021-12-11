@@ -17,6 +17,7 @@ export class Request extends IncomingMessage {
 	hostname: string;
 	ip: string;
 	cookies: Record<string, string>;
+	/** @internal */
 	_init(): this {
 		// @ts-ignore exists on TLSSocket
 		this.secure = this.socket.encrypted || false;
