@@ -1,9 +1,10 @@
 import { renderFile } from "poggies";
-import { test } from "uvu";
+import { suite } from "uvu";
 import { renderEngine, serveStatic } from "../src/coggers";
 import { createFetch } from "./utils";
 const assets = new URL("assets", import.meta.url);
-test("Static Extension", async () => {
+const staticc = suite("Static");
+staticc("Serves Files", async () => {
 	const fetch = await createFetch({
 		assets: serveStatic(assets),
 	});
@@ -12,8 +13,19 @@ test("Static Extension", async () => {
 		.expectHeader("Content-Type", /text\/plain/);
 	fetch.close();
 });
+staticc("Index Files", async () => {
+	const fetch = await createFetch({
+		assets: serveStatic(assets, { index: ["static.txt"] }),
+	});
+	await fetch("/assets")
+		.expect(200, "Hello World!")
+		.expectHeader("Content-Type", /text\/plain/);
+	fetch.close();
+});
+staticc.run();
 
-test("Render Extension", async () => {
+const render = suite("Render");
+render("Render Extension", async () => {
 	const fetch = await createFetch({
 		ext: {
 			$: renderEngine(renderFile, assets, "pog"),
@@ -34,5 +46,4 @@ test("Render Extension", async () => {
 	await fetch("/params").expect(200, "<b>Hello World!</b>");
 	fetch.close();
 });
-
-test.run();
+render.run();
