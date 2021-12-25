@@ -22,6 +22,15 @@ staticc("Index Files", async () => {
 		.expectHeader("Content-Type", /text\/plain/);
 	fetch.close();
 });
+staticc("Extless Files", async () => {
+	const fetch = await createFetch({
+		assets: serveStatic(assets, { ext: [".txt"] }),
+	});
+	await fetch("/assets/static")
+		.expect(200, "Hello World!")
+		.expectHeader("Content-Type", /text\/plain/);
+	fetch.close();
+});
 staticc.run();
 
 const render = suite("Render");

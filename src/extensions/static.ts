@@ -15,23 +15,31 @@ export const serveStatic = (
 		 * @example ["index.html", "index.htm"]
 		 */
 		index?: string[];
+		/**
+		 * Allows files to be served without their extensions. (/foo => /foo.html)
+		 * @example [".html", ".htm"]
+		 */
+		ext?: string[];
 	} = {}
 ): Blueprint => {
 	if (!options.index) options.index = ["index.html", "index.htm"];
+	if (!options.ext) options.ext = [".html", ".htm"];
 	if (typeof dir === "string") dir = pathToFileURL(dir);
 	// make sure the href points to a directory
 	dir.href += "/";
 	const files = readdirSync(dir, { withFileTypes: true });
 	const blueprint: Blueprint = {};
-	for (const file of files)
+	for (const file of files) {
+		const server = serveFile(new URL(file.name, dir));
 		if (file.isDirectory()) {
-			blueprint[file.name] = serveStatic(new URL(file.name, dir), options);
+			blueprint[file.name] = server;
 		} else if (file.isFile()) {
-			if (options.index.includes(file.name))
-				blueprint.$get = serveFile(new URL(file.name, dir));
-			blueprint[file.name] = {
-				$get: serveFile(new URL(file.name, dir)),
-			};
+			if (options.index.includes(file.name)) blueprint.$get = server;
+			for (const ext of options.ext)
+				if (file.name.endsWith(ext))
+					blueprint[file.name.slice(0, -ext.length)] = { $get: server };
+			blueprint[file.name] = { $get: server };
 		}
+	}
 	return blueprint;
 };
