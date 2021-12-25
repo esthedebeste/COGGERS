@@ -30,10 +30,10 @@ export const serveStatic = (
 	const files = readdirSync(dir, { withFileTypes: true });
 	const blueprint: Blueprint = {};
 	for (const file of files) {
-		const server = serveFile(new URL(file.name, dir));
 		if (file.isDirectory()) {
-			blueprint[file.name] = server;
+			blueprint[file.name] = serveStatic(new URL(file.name, dir));
 		} else if (file.isFile()) {
+			const server = serveFile(new URL(file.name, dir));
 			if (options.index.includes(file.name)) blueprint.$get = server;
 			for (const ext of options.ext)
 				if (file.name.endsWith(ext))

@@ -13,6 +13,15 @@ staticc("Serves Files", async () => {
 		.expectHeader("Content-Type", /text\/plain/);
 	fetch.close();
 });
+staticc("Serves Deeply Nested Files", async () => {
+	const fetch = await createFetch({
+		assets: serveStatic(assets),
+	});
+	await fetch("/assets/path/to/a/file.txt")
+		.expect(200, "hi!")
+		.expectHeader("Content-Type", /text\/plain/);
+	fetch.close();
+});
 staticc("Index Files", async () => {
 	const fetch = await createFetch({
 		assets: serveStatic(assets, { index: ["static.txt"] }),
