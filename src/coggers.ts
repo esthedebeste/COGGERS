@@ -1,20 +1,23 @@
 import * as http from "node:http";
-import { Node } from "./node";
+import { Node, pass } from "./node";
 import { Request } from "./req";
 import { Response } from "./res";
-import type { Blueprint, Handler, Params } from "./utils";
+import type { Blueprint, Handler, Middleware, Params } from "./utils";
 export type Options = ConstructorParameters<typeof Coggers>[1];
 
 export class Coggers<
 	SC extends (...args) => {
 		listen(opts: { port: number | string; host: string }, cb: () => void): void;
 	} = typeof http.createServer
-> extends Node {
-	protected options: Options;
+> {
+	/** @internal Coggers.blueprint is annotated as blueprint because it's easier to understand than Node */
+	private node: Node;
+	notFound: Handler;
+	blueprint: Blueprint;
 	server: ReturnType<SC>;
 	constructor(
 		blueprint: Blueprint,
-		options?: {
+		options: {
 			/** Defaults to "COGGERS" */
 			xPoweredBy?: string | false;
 			/** Defaults to `res.status(404).send("Not Found")` */
@@ -23,21 +26,31 @@ export class Coggers<
 			serverCreator?: SC;
 			/** Arguments to http.createServer, https.createServer, etc. */
 			createServerArgs?: Parameters<SC>[0];
-		}
+		} = {}
 	) {
-		super(blueprint);
-		this.options = {
-			xPoweredBy: "COGGERS",
-			notFound: (_, res) => res.status(404).send("Not Found"),
-			serverCreator: http.createServer,
-			createServerArgs: {},
-			...options,
-		};
+		const {
+			xPoweredBy = "COGGERS",
+			notFound = (_, res) => res.status(404).send("Not Found"),
+			serverCreator = http.createServer,
+			createServerArgs = {},
+		} = options;
+
+		if (xPoweredBy !== false) {
+			const xPoweredByMiddleware: Middleware = (_req, res) =>
+				res.setHeader("X-Powered-By", xPoweredBy);
+			if (Array.isArray(blueprint.$)) blueprint.$.unshift(xPoweredByMiddleware);
+			else if (typeof blueprint.$ === "function")
+				blueprint.$ = [xPoweredByMiddleware, blueprint.$];
+			else blueprint.$ = [xPoweredByMiddleware];
+		}
+
+		this.blueprint = this.node = new Node(blueprint);
+		this.notFound = notFound;
 
 		// @ts-ignore
-		this.server = this.options.serverCreator(
+		this.server = serverCreator(
 			{
-				...this.options.createServerArgs,
+				...createServerArgs,
 				IncomingMessage: Request,
 				ServerResponse: Response,
 			},
@@ -58,12 +71,10 @@ export class Coggers<
 		req._init();
 		// Below node v15.7.0
 		if (!res.req) res.req = req;
-		if (this.options.xPoweredBy !== false)
-			res.headers["X-Powered-By"] = this.options.xPoweredBy;
-		const path = req.purl.pathname.slice(1).split("/");
-		const params: Params = { $remaining: path.join("/") || "/" };
-		const notFound = this.options.notFound;
-		const handlers = this.pass(path, req, res, params, notFound);
+		let path = req.purl.pathname.slice(1);
+		if (!path.endsWith("/")) path += "/";
+		const params: Params = { $remaining: path || "/" };
+		const handlers = this.node[pass](path, req, res, params, this.notFound);
 		for (const handler of handlers) {
 			await handler();
 			if (res.writableEnded) break;

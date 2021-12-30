@@ -26,7 +26,7 @@ test("Static Fields", async () => {
 		assert.ok(/^localhost:\d+$/.test(req.host));
 		assert.equal(req.hostname, "localhost");
 		assert.equal(req.query.test, "foo");
-		assert.ok(req.ip.includes("127.0.0.1"));
+		assert.ok(req.ip.includes("127.0.0.1") || req.ip.includes("::1"));
 		assert.equal(req.secure, false);
 		assert.equal(req.protocol, "http");
 		res.end();

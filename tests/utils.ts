@@ -13,12 +13,15 @@ export async function createFetch(
 		notFound?: Handler;
 		xPoweredBy?: string | false;
 	}
-): Promise<FetchFunction & { close?: () => void }> {
-	const server = await new Coggers(
+): Promise<FetchFunction & { close?: () => void; server?: Coggers }> {
+	const coggers = new Coggers(
 		typeof blueprint === "function" ? { $: blueprint } : blueprint,
 		options
-	).listen(0);
-	const fetch: FetchFunction & { close?: () => void } = makeFetch(server);
+	);
+	const server = await coggers.listen(0);
+	const fetch: FetchFunction & { close?: () => void; server?: Coggers } =
+		makeFetch(server);
 	fetch.close = () => server.close();
+	fetch.server = coggers;
 	return fetch;
 }

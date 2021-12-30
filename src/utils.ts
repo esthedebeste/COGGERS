@@ -5,7 +5,7 @@ import { Response as Res } from "./res";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Extended = Record<any, any>;
 export type Params<Added extends string = string> = Record<Added, string> & {
-	/** Remaining part of the URL */
+	/** Remaining part of the URL. Note: this is normalized to *always* have a '/' at the end. */
 	$remaining: string;
 };
 export type Request = Req & Extended;
@@ -14,7 +14,7 @@ export type Handler<P extends string = never> = (
 	req: Request,
 	res: Response,
 	params: Params<P>
-) => Promise<void> | void;
+) => Promise<unknown> | unknown;
 export type Middleware<P extends string = never> = Handler<P>;
 
 /** From import("node:http").METHODS */
@@ -60,8 +60,12 @@ export type Wildcard = `${":" | "$$"}${string}`;
 type urlchars = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"q"|"w"|"e"|"r"|"t"|"y"|"u"|"i"|"o"|"p"|"a"|"s"|"d"|"f"|"g"|"h"|"j"|"k"|"l"|"z"|"x"|"c"|"v"|"b"|"n"|"m"|"-"|"."|"_"|"~"|"["|"]"|"@"|"!"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"%"|"=";
 type pathstart = Lowercase<urlchars> | Uppercase<urlchars>;
 export type Path = `${pathstart}${string}`;
-type Handlers<P extends string> = Array<Handlers<P>> | Handler<P>;
-type Middlewares<P extends string> = Array<Middlewares<P>> | Middleware<P>;
+export type Handlers<P extends string = never> =
+	| Array<Handlers<P>>
+	| Handler<P>;
+export type Middlewares<P extends string = never> =
+	| Array<Middlewares<P>>
+	| Middleware<P>;
 type extractParamName<raw> = raw extends `${"$$" | ":"}${infer R}` ? R : raw;
 export type Blueprint<Params extends string = never> = {
 	$?: Middlewares<Params>;

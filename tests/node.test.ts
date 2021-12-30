@@ -45,7 +45,7 @@ test("Methods", async () => {
 
 test("$remaining key", async () => {
 	const fetch = await createFetch({
-		$: (_req, res, { $remaining }) => {
+		$any: (_req, res, { $remaining }) => {
 			res.send($remaining);
 		},
 		remaining: {
@@ -55,7 +55,7 @@ test("$remaining key", async () => {
 		},
 	});
 	await fetch("/").expect("/");
-	await fetch("/remaining/parts/of/the/url").expect("parts/of/the/url");
+	await fetch("/remaining/parts/of/the/url/").expect("parts/of/the/url/");
 	fetch.close();
 });
 
